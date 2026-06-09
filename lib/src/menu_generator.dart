@@ -169,6 +169,17 @@ class FlutterGemmaMenuGenerator implements MenuGenerator {
 
   @override
   Future<String> get modelPath async {
+    if (Platform.isMacOS) {
+      final home = Platform.environment['HOME'];
+      if (home != null) {
+        final developmentPath =
+            '$home${Platform.pathSeparator}Documents'
+            '${Platform.pathSeparator}models${Platform.pathSeparator}'
+            'gemma-4-e2b-it.litertlm';
+        if (await File(developmentPath).exists()) return developmentPath;
+      }
+    }
+
     final documents = await getApplicationDocumentsDirectory();
     return '${documents.path}${Platform.pathSeparator}models'
         '${Platform.pathSeparator}gemma-4-e2b-it.litertlm';
@@ -185,7 +196,7 @@ class FlutterGemmaMenuGenerator implements MenuGenerator {
 
     await FlutterGemma.installModel(
       modelType: ModelType.gemma4,
-      fileType: ModelFileType.task,
+      fileType: ModelFileType.litertlm,
     ).fromFile(path).install();
 
     try {

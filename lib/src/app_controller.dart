@@ -19,15 +19,20 @@ class AppController extends ChangeNotifier {
   List<String> menus = const [];
   String? winner;
   bool usingFallback = false;
+  bool _aiInitialized = false;
 
   Future<void> initialize() async {
     modelPath = await generator.modelPath;
     try {
       await generator.initialize();
+      _aiInitialized = true;
       status = 'AI READY';
-    } catch (error) {
+    } catch (error, stackTrace) {
+      _aiInitialized = false;
       warning = error.toString();
       status = 'DEMO MODE';
+      debugPrint('Dish Dash: AI initialization failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
     }
     stage = AppStage.ready;
     notifyListeners();
@@ -42,6 +47,12 @@ class AppController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (!_aiInitialized) {
+        await generator.initialize();
+        _aiInitialized = true;
+        status = 'AI READY';
+        notifyListeners();
+      }
       await for (final token in generator.generate().timeout(
         const Duration(seconds: 120),
       )) {
@@ -49,10 +60,11 @@ class AppController extends ChangeNotifier {
         notifyListeners();
       }
       menus = parseMenus(streamedText);
-    } catch (error) {
+    } catch (error, stackTrace) {
       warning = 'AI 생성 실패: $error';
       usingFallback = true;
       debugPrint('Dish Dash: $warning');
+      debugPrintStack(stackTrace: stackTrace);
       debugPrint('Dish Dash: using demo fallback menus.');
       final demoMenus = fallbackMenus
           .take(raceMenuCount)

@@ -9,15 +9,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeMenuGenerator implements MenuGenerator {
-  FakeMenuGenerator({this.fail = false});
+  FakeMenuGenerator({this.fail = false, this.initializationFailures = 0});
 
   final bool fail;
+  int initializationFailures;
 
   @override
   Future<String> get modelPath async => '/fake/model.litertlm';
 
   @override
-  Future<void> initialize() async {}
+  Future<void> initialize() async {
+    if (initializationFailures > 0) {
+      initializationFailures--;
+      throw StateError('initialization failed');
+    }
+  }
 
   @override
   Stream<String> generate() async* {
@@ -58,6 +64,19 @@ void main() {
     expect(controller.usingFallback, isTrue);
     expect(controller.menus, fallbackMenus.take(raceMenuCount));
     expect(controller.warning, contains('AI 생성 실패'));
+  });
+
+  test('retries initialization before generation', () async {
+    final controller = AppController(
+      generator: FakeMenuGenerator(initializationFailures: 1),
+    );
+    await controller.initialize();
+    expect(controller.status, 'DEMO MODE');
+
+    await controller.generateMenus();
+
+    expect(controller.usingFallback, isFalse);
+    expect(controller.menus, hasLength(raceMenuCount));
   });
 
   testWidgets('uses Material actions on Android', (tester) async {
