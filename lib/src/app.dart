@@ -15,6 +15,7 @@ const cream = Color(0xFFFFF1D0);
 const tomato = Color(0xFFE94F37);
 const mustard = Color(0xFFF6AE2D);
 const mint = Color(0xFF2EC4B6);
+const panel = Color(0xFF26231D);
 
 class DishDashApp extends StatefulWidget {
   const DishDashApp({super.key, this.controller});
@@ -168,9 +169,12 @@ class _LoadingScreen extends StatelessWidget {
                   vertical: 30,
                 ),
                 decoration: BoxDecoration(
-                  color: cream.withValues(alpha: 0.07),
-                  border: Border.all(color: mint),
-                  borderRadius: BorderRadius.circular(16),
+                  color: panel,
+                  border: Border.all(color: mint, width: 3),
+                  boxShadow: const [
+                    BoxShadow(color: ink, offset: Offset(6, 6)),
+                    BoxShadow(color: tomato, offset: Offset(10, 10)),
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -187,10 +191,9 @@ class _LoadingScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 18),
                     LinearProgressIndicator(
-                      minHeight: 8,
+                      minHeight: 10,
                       color: mint,
                       backgroundColor: cream.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
                     ),
                   ],
                 ),
@@ -238,31 +241,22 @@ class _RaceScreenState extends State<_RaceScreen> {
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 18),
           child: Column(
             children: [
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'DISH DASH',
-                    style: TextStyle(
-                      color: tomato,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  _LiveBadge(),
-                ],
-              ),
-              const SizedBox(height: 12),
+              const _RaceHeader(),
+              const SizedBox(height: 10),
               Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: GameWidget(game: game),
+                child: _PixelFrame(
+                  color: panel,
+                  borderColor: cream,
+                  shadowColor: tomato,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: GameWidget(game: game),
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                '결승선을 가장 먼저 통과한 메뉴가 오늘의 저녁!',
-                style: TextStyle(color: cream),
+              const _PixelHint(
+                text: '결승선을 가장 먼저 통과한 메뉴가 오늘의 저녁!',
               ),
             ],
           ),
@@ -298,59 +292,58 @@ class _ResultScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 28,
-                  horizontal: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: cream,
-                  border: Border.all(color: ink, width: 3),
-                  boxShadow: const [
-                    BoxShadow(color: tomato, offset: Offset(8, 8)),
-                  ],
-                ),
-                child: Text(
-                  winner,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: ink,
-                    fontSize: 34,
-                    fontWeight: FontWeight.w900,
+              _PixelFrame(
+                color: cream,
+                borderColor: ink,
+                shadowColor: tomato,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 28,
+                    horizontal: 12,
+                  ),
+                  child: Text(
+                    winner,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: ink,
+                      fontSize: 34,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 18),
-              Container(
-                constraints: const BoxConstraints(minHeight: 76),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: cream.withValues(alpha: 0.07),
-                  border: Border.all(color: mint),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      controller.winnerComment.isEmpty
-                          ? '우승 메뉴를 위한 한마디를 만드는 중...'
-                          : controller.winnerComment,
-                      style: TextStyle(
-                        color:
-                            controller.winnerComment.isEmpty
-                                ? cream.withValues(alpha: 0.55)
-                                : cream,
-                        fontSize: 16,
-                        height: 1.35,
-                        fontWeight: FontWeight.bold,
+              _PixelFrame(
+                color: panel,
+                borderColor: mint,
+                shadowColor: ink,
+                child: Container(
+                  constraints: const BoxConstraints(minHeight: 76),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        controller.winnerComment.isEmpty
+                            ? '우승 메뉴를 위한 한마디를 만드는 중...'
+                            : controller.winnerComment,
+                        style: TextStyle(
+                          color:
+                              controller.winnerComment.isEmpty
+                                  ? cream.withValues(alpha: 0.55)
+                                  : cream,
+                          fontSize: 16,
+                          height: 1.35,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const Spacer(),
@@ -406,6 +399,92 @@ class _Shell extends StatelessWidget {
   }
 }
 
+class _RaceHeader extends StatelessWidget {
+  const _RaceHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _PixelFrame(
+      color: panel,
+      borderColor: mustard,
+      shadowColor: ink,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            Text(
+              'DISH DASH CUP',
+              style: TextStyle(
+                color: tomato,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -1,
+              ),
+            ),
+            Spacer(),
+            _LiveBadge(),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PixelFrame extends StatelessWidget {
+  const _PixelFrame({
+    required this.child,
+    this.color = panel,
+    this.borderColor = cream,
+    this.shadowColor = tomato,
+  });
+
+  final Widget child;
+  final Color color;
+  final Color borderColor;
+  final Color shadowColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        border: Border.all(color: borderColor, width: 3),
+        boxShadow: [
+          BoxShadow(color: shadowColor, offset: const Offset(6, 6)),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _PixelHint extends StatelessWidget {
+  const _PixelHint({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return _PixelFrame(
+      color: panel,
+      borderColor: mint,
+      shadowColor: ink,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: cream,
+            fontSize: 13,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _Logo extends StatelessWidget {
   const _Logo();
 
@@ -454,39 +533,40 @@ class _StatusCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ready = controller.warning == null;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: cream.withValues(alpha: 0.07),
-        border: Border.all(color: ready ? mint : mustard),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.circle, size: 11, color: ready ? mint : mustard),
-              const SizedBox(width: 8),
-              Text(
-                controller.status,
-                style: TextStyle(
-                  color: ready ? mint : mustard,
-                  fontWeight: FontWeight.w900,
+    return _PixelFrame(
+      color: panel,
+      borderColor: ready ? mint : mustard,
+      shadowColor: ink,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.square, size: 11, color: ready ? mint : mustard),
+                const SizedBox(width: 8),
+                Text(
+                  controller.status,
+                  style: TextStyle(
+                    color: ready ? mint : mustard,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.6,
+                  ),
                 ),
+              ],
+            ),
+            if (!ready) ...[
+              const SizedBox(height: 8),
+              const Text('모델이 없어도 데모 메뉴로 레이스를 시작할 수 있습니다.'),
+              const SizedBox(height: 5),
+              SelectableText(
+                controller.modelPath ?? '',
+                style: const TextStyle(color: cream, fontSize: 11),
               ),
             ],
-          ),
-          if (!ready) ...[
-            const SizedBox(height: 8),
-            const Text('모델이 없어도 데모 메뉴로 레이스를 시작할 수 있습니다.'),
-            const SizedBox(height: 5),
-            SelectableText(
-              controller.modelPath ?? '',
-              style: const TextStyle(color: cream, fontSize: 11),
-            ),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -511,14 +591,18 @@ class _PlatformButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buttonIcon = _usesCupertino ? cupertinoIcon ?? icon : icon;
     if (_usesCupertino) {
-      final buttonIcon = cupertinoIcon ?? icon;
-      return SizedBox(
+      return Container(
         height: 52,
-        child: CupertinoButton(
+        decoration: BoxDecoration(
           color: color,
+          border: Border.all(color: cream, width: 3),
+          boxShadow: const [BoxShadow(color: ink, offset: Offset(5, 5))],
+        ),
+        child: CupertinoButton(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.zero,
           onPressed: onPressed,
           child: _ButtonContent(label: label, icon: buttonIcon, color: ink),
         ),
@@ -532,7 +616,14 @@ class _PlatformButton extends StatelessWidget {
         style: FilledButton.styleFrom(
           backgroundColor: color,
           foregroundColor: ink,
-          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.8,
+          ),
+          shape: const BeveledRectangleBorder(),
+          side: const BorderSide(color: cream, width: 3),
+          elevation: 8,
+          shadowColor: ink,
         ),
         onPressed: onPressed,
         child: child,
@@ -562,7 +653,11 @@ class _ButtonContent extends StatelessWidget {
           child: Text(
             label,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: color, fontWeight: FontWeight.w800),
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.8,
+            ),
           ),
         ),
       ],
@@ -596,7 +691,7 @@ class _LiveBadge extends StatelessWidget {
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     decoration: BoxDecoration(
       color: tomato,
-      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: cream, width: 2),
     ),
     child: const Text('● LIVE', style: TextStyle(fontWeight: FontWeight.w900)),
   );
@@ -605,15 +700,18 @@ class _LiveBadge extends StatelessWidget {
 class _GridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = cream.withValues(alpha: 0.035)
-          ..strokeWidth = 1;
-    for (var x = 0.0; x < size.width; x += 24) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    canvas.drawColor(ink, BlendMode.src);
+    final dotPaint = Paint()..color = cream.withValues(alpha: 0.06);
+    const step = 16.0;
+    const dot = 3.0;
+    for (var x = 0.0; x < size.width; x += step) {
+      for (var y = 0.0; y < size.height; y += step) {
+        canvas.drawRect(Rect.fromLTWH(x, y, dot, dot), dotPaint);
+      }
     }
-    for (var y = 0.0; y < size.height; y += 24) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    final glowPaint = Paint()..color = tomato.withValues(alpha: 0.035);
+    for (var y = 8.0; y < size.height; y += 64) {
+      canvas.drawRect(Rect.fromLTWH(0, y, size.width, 4), glowPaint);
     }
   }
 
