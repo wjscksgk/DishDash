@@ -1,7 +1,21 @@
+import 'dart:io';
+
 import 'package:dish_dash/src/menu_generator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('builds the model path from shared path constants', () {
+    final path = buildModelPath('Documents');
+
+    expect(
+      path,
+      'Documents${Platform.pathSeparator}models'
+      '${Platform.pathSeparator}gemma-4-e2b-it.litertlm',
+    );
+    expect(path, contains(modelDirectoryName));
+    expect(path, endsWith(modelFileName));
+  });
+
   test(
     'generation prompt requests fourteen restaurant delivery candidates',
     () {
@@ -11,6 +25,22 @@ void main() {
       expect(menuPrompt, isNot(contains('15. [음식이름]')));
     },
   );
+
+  test('winner comment prompt focuses on the food experience', () {
+    final prompt = buildWinnerCommentPrompt('순두부찌개');
+
+    expect(prompt, contains('"순두부찌개"'));
+    expect(prompt, contains('맛, 향, 식감, 온도'));
+    expect(prompt, contains('구체적이고 감각적인 표현'));
+    expect(prompt, contains('맛있겠다는 공감이나 감탄'));
+    expect(prompt, contains('함께 기대하는 듯한 말투'));
+    expect(prompt, contains('재료나 조리법을 지어내지 마'));
+    expect(prompt, contains('35자 이내'));
+    expect(prompt, contains('배달, 주문, 고민, 선택, 확정, 우승, 레이스'));
+    expect(prompt, contains('행동을 권하는 표현은 사용하지 마'));
+    expect(prompt, contains('얼큰한 국물에 포근한 두부라니 맛있겠네요'));
+    expect(prompt, contains('설명이나 접두어 없이 한마디만 출력해'));
+  });
 
   test('follow-up generation prompts request only the missing candidates', () {
     final prompt = buildGenerationPrompt(

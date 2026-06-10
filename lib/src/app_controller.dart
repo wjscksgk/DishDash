@@ -18,6 +18,8 @@ class AppController extends ChangeNotifier {
   String? warning;
   List<String> menus = const [];
   String? winner;
+  String winnerComment = '';
+  bool isGeneratingWinnerComment = false;
   bool usingFallback = false;
   bool _aiInitialized = false;
 
@@ -86,17 +88,41 @@ class AppController extends ChangeNotifier {
   void finishRace(String menu) {
     if (stage != AppStage.racing) return;
     winner = menu;
+    winnerComment = '';
+    isGeneratingWinnerComment = _aiInitialized;
     stage = AppStage.result;
     notifyListeners();
+    unawaited(_generateWinnerComment(menu));
   }
 
-  void replay() {
-    winner = null;
-    stage = AppStage.racing;
-    notifyListeners();
-  }
+  Future<void> _generateWinnerComment(String menu) async {
+    if (!_aiInitialized) {
+      winnerComment = _fallbackWinnerComment(menu);
+      isGeneratingWinnerComment = false;
+      notifyListeners();
+      return;
+    }
 
-  Future<void> regenerate() => generateMenus();
+    try {
+      await for (final token in generator
+          .generateWinnerComment(menu)
+          .timeout(const Duration(seconds: 20))) {
+        winnerComment += token;
+        notifyListeners();
+      }
+      winnerComment = winnerComment.trim();
+      if (winnerComment.isEmpty) {
+        winnerComment = _fallbackWinnerComment(menu);
+      }
+    } catch (error, stackTrace) {
+      winnerComment = _fallbackWinnerComment(menu);
+      debugPrint('Dish Dash: winner comment generation failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    } finally {
+      isGeneratingWinnerComment = false;
+      notifyListeners();
+    }
+  }
 
   @override
   void dispose() {
@@ -104,3 +130,5 @@ class AppController extends ChangeNotifier {
     super.dispose();
   }
 }
+
+String _fallbackWinnerComment(String menu) => '$menu 특유의 맛과 식감, 생각만 해도 맛있겠네요.';

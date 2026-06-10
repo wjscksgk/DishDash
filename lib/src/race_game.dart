@@ -127,11 +127,6 @@ class Racer extends PositionComponent with CollisionCallbacks {
         max(4.0, (size.y - label.height) / 2 - 6),
       ),
     );
-    canvas.drawCircle(
-      Offset(size.x / 2, size.y - 10),
-      min(size.x * 0.2, 7),
-      Paint()..color = const Color(0xFFFFF1D0),
-    );
   }
 }
 

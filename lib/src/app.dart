@@ -288,7 +288,6 @@ class _ResultScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
-              const Icon(Icons.emoji_events_rounded, size: 82, color: mustard),
               const Text(
                 'WINNER',
                 textAlign: TextAlign.center,
@@ -321,6 +320,39 @@ class _ResultScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 18),
+              Container(
+                constraints: const BoxConstraints(minHeight: 76),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: cream.withValues(alpha: 0.07),
+                  border: Border.all(color: mint),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      controller.winnerComment.isEmpty
+                          ? '우승 메뉴를 위한 한마디를 만드는 중...'
+                          : controller.winnerComment,
+                      style: TextStyle(
+                        color:
+                            controller.winnerComment.isEmpty
+                                ? cream.withValues(alpha: 0.55)
+                                : cream,
+                        fontSize: 16,
+                        height: 1.35,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const Spacer(),
               const Text(
                 '주문할 앱을 선택하세요',
@@ -345,26 +377,6 @@ class _ResultScreen extends StatelessWidget {
                       color: tomato,
                       onPressed:
                           () => openDeliveryApp(DeliveryApp.yogiyo, winner),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _PlatformButton(
-                      emphasis: _ButtonEmphasis.secondary,
-                      onPressed: controller.replay,
-                      label: '같은 메뉴 재경주',
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _PlatformButton(
-                      emphasis: _ButtonEmphasis.secondary,
-                      onPressed: controller.regenerate,
-                      label: '새 메뉴 생성',
                     ),
                   ),
                 ],
@@ -480,8 +492,6 @@ class _StatusCard extends StatelessWidget {
   }
 }
 
-enum _ButtonEmphasis { primary, secondary }
-
 bool get _usesCupertino => defaultTargetPlatform == TargetPlatform.iOS;
 
 class _PlatformButton extends StatelessWidget {
@@ -491,7 +501,6 @@ class _PlatformButton extends StatelessWidget {
     this.icon,
     this.cupertinoIcon,
     this.color = mustard,
-    this.emphasis = _ButtonEmphasis.primary,
   });
 
   final String label;
@@ -499,7 +508,6 @@ class _PlatformButton extends StatelessWidget {
   final IconData? icon;
   final IconData? cupertinoIcon;
   final Color color;
-  final _ButtonEmphasis emphasis;
 
   @override
   Widget build(BuildContext context) {
@@ -508,38 +516,27 @@ class _PlatformButton extends StatelessWidget {
       return SizedBox(
         height: 52,
         child: CupertinoButton(
-          color: emphasis == _ButtonEmphasis.primary ? color : null,
+          color: color,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           borderRadius: BorderRadius.circular(12),
           onPressed: onPressed,
-          child: _ButtonContent(
-            label: label,
-            icon: buttonIcon,
-            color: emphasis == _ButtonEmphasis.primary ? ink : cream,
-          ),
+          child: _ButtonContent(label: label, icon: buttonIcon, color: ink),
         ),
       );
     }
 
-    final child = _ButtonContent(
-      label: label,
-      icon: icon,
-      color: emphasis == _ButtonEmphasis.primary ? ink : null,
-    );
+    final child = _ButtonContent(label: label, icon: icon, color: ink);
     return SizedBox(
       height: 52,
-      child:
-          emphasis == _ButtonEmphasis.primary
-              ? FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: color,
-                  foregroundColor: ink,
-                  textStyle: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-                onPressed: onPressed,
-                child: child,
-              )
-              : OutlinedButton(onPressed: onPressed, child: child),
+      child: FilledButton(
+        style: FilledButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: ink,
+          textStyle: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        onPressed: onPressed,
+        child: child,
+      ),
     );
   }
 }

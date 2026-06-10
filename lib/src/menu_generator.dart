@@ -22,6 +22,12 @@ const fallbackMenus = <String>[
 const generatedMenuCount = 14;
 const raceMenuCount = 7;
 const maxGenerationRounds = 2;
+const modelDirectoryName = 'models';
+const modelFileName = 'gemma-4-e2b-it.litertlm';
+
+String buildModelPath(String documentsPath) =>
+    '$documentsPath${Platform.pathSeparator}$modelDirectoryName'
+    '${Platform.pathSeparator}$modelFileName';
 
 String buildGenerationPrompt({
   required int count,
@@ -58,6 +64,33 @@ ${List.generate(count, (index) => '${index + 1}. [음식이름]').join('\n')}
 ''';
 
 final menuPrompt = buildGenerationPrompt(count: generatedMenuCount);
+
+String buildWinnerCommentPrompt(String menu) => '''
+오늘의 메뉴는 "$menu"야.
+이 음식의 매력이 생생하게 느껴지는 짧은 한국어 한마디를 작성해.
+
+작성 기준:
+- 맛, 향, 식감, 온도 중 이 음식의 대표적인 특징 한 가지에 집중해.
+- 먹는 순간을 떠올릴 수 있도록 구체적이고 감각적인 표현을 사용해.
+- 앞부분에서 음식의 매력을 묘사하고, 뒷부분에서 맛있겠다는 공감이나 감탄을 표현해.
+- 사용자에게 행동을 권하지 말고 함께 기대하는 듯한 말투로 작성해.
+- 메뉴 이름을 억지로 반복하지 않아도 돼.
+- 실제 음식에 일반적으로 어울리는 특징만 묘사하고 재료나 조리법을 지어내지 마.
+- 35자 이내로 작성해.
+- 따옴표, 목록 기호, 이모지는 사용하지 마.
+- 배달, 주문, 고민, 선택, 확정, 우승, 레이스라는 단어는 사용하지 마.
+- 느껴보세요, 즐겨보세요, 드셔보세요처럼 행동을 권하는 표현은 사용하지 마.
+- 맛있겠네요라는 말만 단독으로 쓰지 말고 반드시 음식의 구체적인 특징을 함께 적어.
+- 다른 음식을 언급하거나 추천하지 마.
+
+좋은 예:
+- 순두부찌개: 얼큰한 국물에 포근한 두부라니 맛있겠네요
+- 순두부찌개: 보들보들한 두부가 정말 든든하겠어요
+- 치킨: 바삭한 껍질과 촉촉한 살이 정말 맛있겠네요
+- 초밥: 부드러운 회와 고슬한 밥의 조화가 좋겠네요
+
+설명이나 접두어 없이 한마디만 출력해.
+''';
 
 String buildValidationPrompt(String candidates) => '''
 아래 목록은 다른 AI가 만든 배달 음식 후보야. 각 항목을 검수하고 통과할 항목의 번호만 선택해.
@@ -160,6 +193,7 @@ abstract interface class MenuGenerator {
   Future<String> get modelPath;
   Future<void> initialize();
   Stream<String> generate();
+  Stream<String> generateWinnerComment(String menu);
   Future<void> dispose();
 }
 
@@ -172,17 +206,15 @@ class FlutterGemmaMenuGenerator implements MenuGenerator {
     if (Platform.isMacOS) {
       final home = Platform.environment['HOME'];
       if (home != null) {
-        final developmentPath =
-            '$home${Platform.pathSeparator}Documents'
-            '${Platform.pathSeparator}models${Platform.pathSeparator}'
-            'gemma-4-e2b-it.litertlm';
+        final developmentPath = buildModelPath(
+          '$home${Platform.pathSeparator}Documents',
+        );
         if (await File(developmentPath).exists()) return developmentPath;
       }
     }
 
     final documents = await getApplicationDocumentsDirectory();
-    return '${documents.path}${Platform.pathSeparator}models'
-        '${Platform.pathSeparator}gemma-4-e2b-it.litertlm';
+    return buildModelPath(documents.path);
   }
 
   @override
@@ -301,6 +333,26 @@ class FlutterGemmaMenuGenerator implements MenuGenerator {
         .join('\n');
     debugPrint('Dish Dash final race menus:\n$finalOutput');
     yield finalOutput;
+  }
+
+  @override
+  Stream<String> generateWinnerComment(String menu) async* {
+    final model = _model;
+    if (model == null) throw StateError('Model is not initialized.');
+
+    await _chat?.close();
+    _chat = await _createChat(model, temperature: 0.75);
+    try {
+      await _chat!.addQuery(
+        Message.text(text: buildWinnerCommentPrompt(menu), isUser: true),
+      );
+      await for (final response in _chat!.generateChatResponseAsync()) {
+        if (response is TextResponse) yield response.token;
+      }
+    } finally {
+      await _chat?.close();
+      _chat = null;
+    }
   }
 
   Future<String> _runChat(

@@ -64,8 +64,7 @@ download, or bundle the model without an explicit request.
 - The result screen must offer:
   - Baemin
   - Yogiyo
-  - replay with the same candidates
-  - regenerate candidates
+- Do not offer replay or candidate regeneration after a winner is selected.
 - Deep-link failure must degrade to copying the food name, opening the app
   home, or opening the platform store.
 
