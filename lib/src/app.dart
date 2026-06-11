@@ -4,6 +4,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'app_controller.dart';
 import 'delivery_launcher.dart';
@@ -173,7 +174,6 @@ class _LoadingScreen extends StatelessWidget {
                   border: Border.all(color: mint, width: 3),
                   boxShadow: const [
                     BoxShadow(color: ink, offset: Offset(6, 6)),
-                    BoxShadow(color: tomato, offset: Offset(10, 10)),
                   ],
                 ),
                 child: Column(
@@ -181,7 +181,7 @@ class _LoadingScreen extends StatelessWidget {
                     const _PlatformActivityIndicator(),
                     const SizedBox(height: 20),
                     const Text(
-                      '배달 메뉴를 생성하고 검수하는 중',
+                      'AI 주방장, 오늘의 메뉴 조합 중!',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: cream,
@@ -223,8 +223,27 @@ class _RaceScreen extends StatefulWidget {
 }
 
 class _RaceScreenState extends State<_RaceScreen> {
+  String? countdown = '3';
+  List<RaceStanding>? _pendingStandings;
+  String? _pendingCountdown;
+  bool _hasPendingCountdown = false;
+  bool _frameUpdateScheduled = false;
+
+  late List<RaceStanding> standings = [
+    for (var index = 0; index < widget.controller.menus.length; index++)
+      RaceStanding(
+        number: index + 1,
+        menu: widget.controller.menus[index],
+        color: racerColors[index % racerColors.length],
+        progress: 0,
+        rank: index + 1,
+      ),
+  ];
+
   late final DishDashGame game = DishDashGame(
     menus: widget.controller.menus,
+    onStandingsChanged: _queueStandings,
+    onCountdownChanged: _queueCountdown,
     onWinner: (winner) {
       Future<void>.delayed(
         const Duration(milliseconds: 800),
@@ -233,32 +252,63 @@ class _RaceScreenState extends State<_RaceScreen> {
     },
   );
 
+  void _queueStandings(List<RaceStanding> nextStandings) {
+    _pendingStandings = nextStandings;
+    _scheduleFrameUpdate();
+  }
+
+  void _queueCountdown(String? value) {
+    _pendingCountdown = value;
+    _hasPendingCountdown = true;
+    _scheduleFrameUpdate();
+  }
+
+  void _scheduleFrameUpdate() {
+    if (_frameUpdateScheduled) return;
+    _frameUpdateScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _frameUpdateScheduled = false;
+      if (!mounted) return;
+
+      final nextStandings = _pendingStandings;
+      final hasCountdown = _hasPendingCountdown;
+      final nextCountdown = _pendingCountdown;
+      _pendingStandings = null;
+      _hasPendingCountdown = false;
+
+      setState(() {
+        if (nextStandings != null) standings = nextStandings;
+        if (hasCountdown) countdown = nextCountdown;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return _Shell(
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 14, 12, 18),
-          child: Column(
-            children: [
-              const _RaceHeader(),
-              const SizedBox(height: 10),
-              Expanded(
-                child: _PixelFrame(
-                  color: panel,
-                  borderColor: cream,
-                  shadowColor: tomato,
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: GameWidget(game: game),
-                  ),
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
+          child: Container(
+            decoration: BoxDecoration(
+              color: panel,
+              border: Border.all(color: cream, width: 2),
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              clipBehavior: Clip.hardEdge,
+              children: [
+                GameWidget(game: game),
+                Positioned(
+                  top: 10,
+                  left: 10,
+                  right: 10,
+                  child: _RaceStandingsBoard(standings: standings),
                 ),
-              ),
-              const SizedBox(height: 10),
-              const _PixelHint(
-                text: '결승선을 가장 먼저 통과한 메뉴가 오늘의 저녁!',
-              ),
-            ],
+                if (countdown != null)
+                  Center(child: _RaceCountdownLabel(text: countdown!)),
+              ],
+            ),
           ),
         ),
       ),
@@ -295,7 +345,7 @@ class _ResultScreen extends StatelessWidget {
               _PixelFrame(
                 color: cream,
                 borderColor: ink,
-                shadowColor: tomato,
+                shadowColor: ink,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 28,
@@ -399,37 +449,6 @@ class _Shell extends StatelessWidget {
   }
 }
 
-class _RaceHeader extends StatelessWidget {
-  const _RaceHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return const _PixelFrame(
-      color: panel,
-      borderColor: mustard,
-      shadowColor: ink,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          children: [
-            Text(
-              'DISH DASH CUP',
-              style: TextStyle(
-                color: tomato,
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -1,
-              ),
-            ),
-            Spacer(),
-            _LiveBadge(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _PixelFrame extends StatelessWidget {
   const _PixelFrame({
     required this.child,
@@ -449,37 +468,145 @@ class _PixelFrame extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         border: Border.all(color: borderColor, width: 3),
-        boxShadow: [
-          BoxShadow(color: shadowColor, offset: const Offset(6, 6)),
-        ],
+        boxShadow: [BoxShadow(color: shadowColor, offset: const Offset(6, 6))],
       ),
       child: child,
     );
   }
 }
 
-class _PixelHint extends StatelessWidget {
-  const _PixelHint({required this.text});
+class _RaceStandingsBoard extends StatelessWidget {
+  const _RaceStandingsBoard({required this.standings});
+
+  final List<RaceStanding> standings;
+
+  @override
+  Widget build(BuildContext context) {
+    final splitIndex = (standings.length / 2).ceil();
+    final columns = [
+      standings.take(splitIndex).toList(growable: false),
+      standings.skip(splitIndex).toList(growable: false),
+    ];
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: ink.withValues(alpha: 0.9),
+        border: Border.all(color: cream.withValues(alpha: 0.7), width: 1.5),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (
+              var columnIndex = 0;
+              columnIndex < columns.length;
+              columnIndex++
+            ) ...[
+              if (columnIndex > 0) const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  children: [
+                    for (final standing in columns[columnIndex])
+                      _StandingRow(standing: standing),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RaceCountdownLabel extends StatelessWidget {
+  const _RaceCountdownLabel({required this.text});
 
   final String text;
 
   @override
   Widget build(BuildContext context) {
-    return _PixelFrame(
-      color: panel,
-      borderColor: mint,
-      shadowColor: ink,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: cream,
-            fontSize: 13,
-            fontWeight: FontWeight.w900,
-          ),
+    return Container(
+      constraints: const BoxConstraints(minWidth: 92),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+      decoration: BoxDecoration(
+        color: ink.withValues(alpha: 0.9),
+        border: Border.all(color: mustard, width: 3),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: cream,
+          fontSize: 34,
+          height: 1,
+          fontWeight: FontWeight.w900,
         ),
+      ),
+    );
+  }
+}
+
+class _StandingRow extends StatelessWidget {
+  const _StandingRow({required this.standing});
+
+  final RaceStanding standing;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPodium = standing.rank <= 3;
+    return SizedBox(
+      height: 24,
+      child: Row(
+        children: [
+          Container(
+            width: 21,
+            height: 18,
+            alignment: Alignment.center,
+            color: isPodium ? mustard : cream.withValues(alpha: 0.12),
+            child: Text(
+              '${standing.rank}',
+              style: TextStyle(
+                color: isPodium ? ink : cream,
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 5),
+          Container(
+            width: 18,
+            height: 18,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: standing.color,
+              border: Border.all(color: ink),
+            ),
+            child: Text(
+              '${standing.number}',
+              style: const TextStyle(
+                color: ink,
+                fontSize: 9,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          const SizedBox(width: 5),
+          Expanded(
+            child: Text(
+              standing.menu,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: isPodium ? cream : cream.withValues(alpha: 0.82),
+                fontSize: 11,
+                fontWeight: isPodium ? FontWeight.w900 : FontWeight.w700,
+                height: 1,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -681,20 +808,6 @@ class _PlatformActivityIndicator extends StatelessWidget {
       ),
     );
   }
-}
-
-class _LiveBadge extends StatelessWidget {
-  const _LiveBadge();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(
-      color: tomato,
-      border: Border.all(color: cream, width: 2),
-    ),
-    child: const Text('● LIVE', style: TextStyle(fontWeight: FontWeight.w900)),
-  );
 }
 
 class _GridPainter extends CustomPainter {

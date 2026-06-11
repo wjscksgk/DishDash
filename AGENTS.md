@@ -10,7 +10,7 @@ delivery app search through a deep link.
 Primary flow:
 
 1. Initialize the local Gemma runtime in the background.
-2. Stream ten food candidates and display generated tokens.
+2. Generate and validate ten food candidates while showing generation progress.
 3. Run a ten-racer Flame game using the menu names.
 4. Show the winning food.
 5. Let the user choose Baemin or Yogiyo.
@@ -58,7 +58,7 @@ download, or bundle the model without an explicit request.
 - Keep all ten racers readable on a phone-sized screen.
 - Maintain the charcoal, cream, tomato, mustard, and mint arcade palette unless
   a redesign is requested.
-- Stream generated text visibly so users can see the AI generation process.
+- Show a clear loading or progress state while the AI generation process runs.
 - The race should contain visible overtaking and normally finish in roughly
   8-14 seconds.
 - The result screen must offer:

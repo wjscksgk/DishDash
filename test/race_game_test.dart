@@ -7,39 +7,91 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:dish_dash/src/race_game.dart';
 
 void main() {
-  test('racer moves downward without changing lanes', () {
+  Racer buildRacer({
+    required int number,
+    required String menu,
+    required double x,
+    required double y,
+    double startY = 1000,
+    double finishY = 100,
+    ValueChanged<String>? onFinish,
+  }) {
+    return Racer(
+      number: number,
+      menu: menu,
+      color: racerColors[(number - 1) % racerColors.length],
+      random: Random(number),
+      startY: startY,
+      finishY: finishY,
+      onFinish: onFinish ?? (_) {},
+      position: Vector2(x, y),
+      size: Vector2(32, 50),
+    );
+  }
+
+  test('racer moves upward without changing lanes', () {
     var finishCount = 0;
-    final racer = Racer(
+    final racer = buildRacer(
+      number: 1,
       menu: '치킨',
-      color: Colors.red,
-      random: Random(1),
-      maxY: 1000,
+      x: 20,
+      y: 800,
       onFinish: (_) => finishCount++,
-      position: Vector2(20, 8),
-      size: Vector2(40, 80),
     );
 
     racer.update(0.5);
 
     expect(racer.position.x, 20);
-    expect(racer.position.y, greaterThan(8));
+    expect(racer.position.y, lessThan(800));
     expect(finishCount, 0);
   });
 
-  test('racer finishes at the bottom boundary', () {
+  test('racer finishes at the top boundary only once', () {
     String? winner;
-    final racer = Racer(
+    var finishCount = 0;
+    final racer = buildRacer(
+      number: 2,
       menu: '떡볶이',
-      color: Colors.red,
-      random: Random(1),
-      maxY: 100,
-      onFinish: (menu) => winner = menu,
-      position: Vector2(20, 30),
-      size: Vector2(40, 60),
+      x: 20,
+      y: 110,
+      onFinish: (menu) {
+        winner = menu;
+        finishCount++;
+      },
     );
 
     racer.update(0.5);
+    racer.update(0.5);
 
     expect(winner, '떡볶이');
+    expect(racer.position.y, 100);
+    expect(finishCount, 1);
   });
+
+  test('standings reorder after an overtake and keep stable ties', () {
+    final racers = [
+      buildRacer(number: 1, menu: '치킨', x: 10, y: 700),
+      buildRacer(number: 2, menu: '피자', x: 50, y: 500),
+      buildRacer(number: 3, menu: '족발', x: 90, y: 700),
+    ];
+
+    final standings = buildRaceStandings(racers);
+
+    expect(standings.map((standing) => standing.number), [2, 1, 3]);
+    expect(standings.map((standing) => standing.rank), [1, 2, 3]);
+  });
+
+  test(
+    'camera target follows the average position of the top three racers',
+    () {
+      final racers = [
+        buildRacer(number: 1, menu: '치킨', x: 10, y: 520),
+        buildRacer(number: 2, menu: '피자', x: 50, y: 300),
+        buildRacer(number: 3, menu: '족발', x: 90, y: 380),
+        buildRacer(number: 4, menu: '파스타', x: 130, y: 700),
+      ];
+
+      expect(calculateLeaderTargetY(racers), 400);
+    },
+  );
 }

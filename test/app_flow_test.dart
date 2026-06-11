@@ -147,9 +147,37 @@ void main() {
     await tester.pumpWidget(DishDashApp(controller: controller));
 
     expect(find.text('1. 치킨\n2. 피자'), findsNothing);
-    expect(find.text('배달 메뉴를 생성하고 검수하는 중'), findsOneWidget);
+    expect(find.text('AI 주방장, 오늘의 메뉴 조합 중!'), findsOneWidget);
     expect(find.text('2 / 14'), findsNothing);
     expect(find.byType(LinearProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('race screen shows ten readable standings on a narrow phone', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final controller = AppController(generator: FakeMenuGenerator());
+    controller.stage = AppStage.racing;
+    controller.menus = fallbackMenus.take(raceMenuCount).toList();
+
+    await tester.pumpWidget(DishDashApp(controller: controller));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    await tester.pump(const Duration(milliseconds: 650));
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pump();
+
+    for (final menu in controller.menus) {
+      expect(find.text(menu), findsOneWidget);
+    }
+    expect(find.text('DISH DASH CUP'), findsNothing);
+    expect(find.text('● LIVE'), findsNothing);
+    expect(find.text('결승선을 가장 먼저 통과한 메뉴가 오늘의 저녁!'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('result only offers delivery app actions', (tester) async {

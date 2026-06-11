@@ -59,7 +59,6 @@ class AppController extends ChangeNotifier {
         const Duration(seconds: 120),
       )) {
         streamedText += token;
-        notifyListeners();
       }
       menus = parseMenus(streamedText);
     } catch (error, stackTrace) {

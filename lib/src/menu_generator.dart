@@ -20,7 +20,7 @@ const fallbackMenus = <String>[
 ];
 
 const generatedMenuCount = 14;
-const raceMenuCount = 7;
+const raceMenuCount = 10;
 const maxGenerationRounds = 2;
 const modelDirectoryName = 'models';
 const modelFileName = 'gemma-4-e2b-it.litertlm';
