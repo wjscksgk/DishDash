@@ -8,7 +8,7 @@ enum DeliveryApp { baemin, yogiyo }
 Future<void> openDeliveryApp(DeliveryApp app, String foodName) async {
   final query = Uri.encodeComponent(foodName);
   final search = switch (app) {
-    DeliveryApp.baemin => Uri.parse('baemin://search?query=$query'),
+    DeliveryApp.baemin => Uri.parse('baemin://search?search_query=$query'),
     DeliveryApp.yogiyo => Uri.parse('yogiyo://search?query=$query'),
   };
   final home = switch (app) {
