@@ -3,16 +3,18 @@
 ## Project Overview
 
 Dish Dash is a Flutter PBL project targeting Android and iOS from one Dart
-codebase. It generates ten Korean delivery-food candidates with an on-device
-LLM, sends them into a Flame top-view race, selects the winner, and opens a
-delivery app search through a deep link.
+codebase, with Windows used as a development target. It generates Korean
+delivery-food candidates with an on-device LLM, validates them, sends ten of
+them into a Flame top-view race, selects the winner, generates a short winner
+comment, and opens a delivery app through a deep link.
 
 Primary flow:
 
 1. Initialize the local Gemma runtime in the background.
-2. Generate and validate ten food candidates while showing generation progress.
+2. Generate 14 food candidates, validate them in a separate chat, and repeat up
+   to two rounds until ten race menus are collected.
 3. Run a ten-racer Flame game using the menu names.
-4. Show the winning food.
+4. Show the winning food and a short AI-generated Korean comment.
 5. Let the user choose Baemin or Coupang Eats.
 
 The implementation must remain usable for demonstrations when the model or a
@@ -26,8 +28,7 @@ native runtime is unavailable.
 - Model: Gemma 4 E2B in `.litertlm` format
 - Game engine: Flame
 - External app launch: `url_launcher`
-- Model location:
-  `Documents/models/gemma-4-e2b-it.litertlm`
+- Model location: `Documents/models/gemma-4-e2b-it.litertlm`
 - UI direction: portrait only
 - Visual direction: retro food arcade
 
@@ -39,18 +40,31 @@ download, or bundle the model without an explicit request.
 - `AppController` owns the app flow:
   `booting -> ready -> generating -> racing -> result`.
 - Keep LLM access behind the `MenuGenerator` interface.
+- `MenuGenerator` includes `modelPath`, `initialize`, `generate`,
+  `generateWinnerComment`, and `dispose`.
 - `FlutterGemmaMenuGenerator` must request GPU first and retry with CPU if GPU
   model initialization fails.
-- Create a fresh chat for every menu generation so previous output does not
-  affect a new race.
+- Create a fresh chat for every generation, validation, and winner-comment
+  request so previous output does not affect a new race.
 - Close chats and inference models when they are no longer needed.
 - Keep menu parsing independent from UI and native runtime code.
 - Parse numbered lines, trim wrappers and whitespace, remove duplicates, and
   always return exactly ten menu names by filling from `fallbackMenus`.
+- Generate `generatedMenuCount` candidates per round, retain only numbered
+  candidates accepted by the validation prompt, and use at most
+  `maxGenerationRounds` rounds.
+- Shuffle the validated menu pool before taking the ten final race menus.
 - Model absence, initialization failure, generation failure, or timeout must
   not block the game. Clearly indicate demo/fallback mode and continue.
 - Winner selection must be idempotent. Only the first finish event may change
   the app state.
+- Winner-comment generation must not block the result screen. If the model is
+  unavailable, times out, fails, or returns an empty comment, use the local
+  fallback comment.
+- `DishDashGame` owns race simulation and reports standings, countdown, and
+  winner through callbacks; it must not know about `AppController`.
+- Flutter UI must coalesce Flame callback updates with post-frame scheduling to
+  avoid `setState` during build.
 
 ## UI And Game Rules
 
@@ -61,12 +75,17 @@ download, or bundle the model without an explicit request.
 - Show a clear loading or progress state while the AI generation process runs.
 - The race should contain visible overtaking and normally finish in roughly
   8-14 seconds.
+- Show all ten standings in a readable two-column overlay on phone-sized
+  screens.
 - The result screen must offer:
   - Baemin
   - Coupang Eats
 - Do not offer replay or candidate regeneration after a winner is selected.
-- Deep-link failure must degrade to copying the food name, opening the app
-  home, or opening the platform store.
+- Deep-link failure must degrade to copying the food name, opening the app home,
+  or opening the platform store.
+- Baemin may use a search deep link. Coupang Eats currently has no search deep
+  link in code, so it should copy the winning food name and open the app home
+  before falling back to the store.
 
 ## Platform Constraints
 
@@ -74,6 +93,8 @@ download, or bundle the model without an explicit request.
 
 - `.litertlm` inference is supported only on `arm64-v8a`.
 - Keep Android `minSdk` at 24 or higher.
+- Keep the Android ABI filter restricted to `arm64-v8a` unless explicitly
+  changing model/runtime validation scope.
 - Preserve the OpenCL native-library declarations in `AndroidManifest.xml`.
 - Preserve Baemin and Coupang Eats package/scheme visibility declarations.
 - Android x86_64 emulators cannot validate the real Gemma `.litertlm` path.
@@ -97,6 +118,16 @@ download, or bundle the model without an explicit request.
 - Flutter plugins require Developer Mode or an administrator terminal for
   symbolic-link creation.
 
+### macOS
+
+- macOS exists for Flutter desktop development and local Gemma integration
+  testing, but it is not a product release target.
+- On macOS, `FlutterGemmaMenuGenerator.modelPath` first checks
+  `$HOME/Documents/models/gemma-4-e2b-it.litertlm` before using the Flutter
+  application documents directory.
+- Preserve the macOS Podfile and Xcode build-phase handling for LiteRT-LM
+  companion dylibs unless explicitly changing desktop Gemma support.
+
 ## Model Handling
 
 - Never commit `.litertlm` files.
@@ -104,6 +135,8 @@ download, or bundle the model without an explicit request.
 - Use `scripts/install_model_android.ps1` for Android development injection.
 - Keep model installation instructions synchronized with the actual path used
   by `FlutterGemmaMenuGenerator`.
+- On iOS, install the model through app file sharing into the app's `models`
+  folder under Documents.
 - Do not log credentials or introduce a Hugging Face token unless network model
   download is explicitly added.
 
