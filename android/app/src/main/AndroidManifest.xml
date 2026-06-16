@@ -47,14 +47,14 @@
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
         <package android:name="com.sampleapp" />
-        <package android:name="com.fineapp.yogiyo" />
+        <package android:name="com.coupang.mobile.eats" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="baemin" />
         </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="yogiyo" />
+            <data android:scheme="coupangeats" />
         </intent>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>

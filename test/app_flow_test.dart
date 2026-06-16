@@ -192,7 +192,7 @@ void main() {
     expect(find.text('AI 한마디'), findsNothing);
     expect(find.text('오늘 메뉴는 치킨, 확정!'), findsOneWidget);
     expect(find.text('배민'), findsOneWidget);
-    expect(find.text('요기요'), findsOneWidget);
+    expect(find.text('쿠팡이츠'), findsOneWidget);
     expect(find.text('같은 메뉴 재경주'), findsNothing);
     expect(find.text('새 메뉴 생성'), findsNothing);
     expect(find.byIcon(Icons.emoji_events_rounded), findsNothing);

@@ -13,7 +13,7 @@ Primary flow:
 2. Generate and validate ten food candidates while showing generation progress.
 3. Run a ten-racer Flame game using the menu names.
 4. Show the winning food.
-5. Let the user choose Baemin or Yogiyo.
+5. Let the user choose Baemin or Coupang Eats.
 
 The implementation must remain usable for demonstrations when the model or a
 native runtime is unavailable.
@@ -63,7 +63,7 @@ download, or bundle the model without an explicit request.
   8-14 seconds.
 - The result screen must offer:
   - Baemin
-  - Yogiyo
+  - Coupang Eats
 - Do not offer replay or candidate regeneration after a winner is selected.
 - Deep-link failure must degrade to copying the food name, opening the app
   home, or opening the platform store.
@@ -75,7 +75,7 @@ download, or bundle the model without an explicit request.
 - `.litertlm` inference is supported only on `arm64-v8a`.
 - Keep Android `minSdk` at 24 or higher.
 - Preserve the OpenCL native-library declarations in `AndroidManifest.xml`.
-- Preserve Baemin and Yogiyo package/scheme visibility declarations.
+- Preserve Baemin and Coupang Eats package/scheme visibility declarations.
 - Android x86_64 emulators cannot validate the real Gemma `.litertlm` path.
 - Use an arm64 physical device for final inference and deep-link validation.
 
@@ -84,7 +84,7 @@ download, or bundle the model without an explicit request.
 - Keep the deployment target at iOS 16 or higher.
 - Keep CocoaPods statically linked.
 - Preserve the extended-addressing and increased-memory entitlements.
-- Preserve `baemin` and `yogiyo` query schemes.
+- Preserve `baemin` and `coupangeats` query schemes.
 - Use an arm64 physical iPhone for final model, memory, Metal, and deep-link
   validation. The simulator is suitable primarily for UI and game checks.
 

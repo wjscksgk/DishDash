@@ -416,10 +416,11 @@ class _ResultScreen extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _PlatformButton(
-                      label: '요기요',
+                      label: '쿠팡이츠',
                       color: tomato,
                       onPressed:
-                          () => openDeliveryApp(DeliveryApp.yogiyo, winner),
+                          () =>
+                              openDeliveryApp(DeliveryApp.coupangEats, winner),
                     ),
                   ),
                 ],
