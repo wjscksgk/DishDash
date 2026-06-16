@@ -149,7 +149,7 @@ void main() {
     expect(find.text('1. 치킨\n2. 피자'), findsNothing);
     expect(find.text('AI 주방장, 오늘의 메뉴 조합 중!'), findsOneWidget);
     expect(find.text('2 / 14'), findsNothing);
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(find.byType(LinearProgressIndicator), findsNothing);
   });
 
   testWidgets('race screen shows ten readable standings on a narrow phone', (

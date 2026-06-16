@@ -36,9 +36,24 @@ class RaceStanding {
   final int rank;
 }
 
-List<RaceStanding> buildRaceStandings(Iterable<Racer> racers) {
+List<RaceStanding> buildRaceStandings(
+  Iterable<Racer> racers, {
+  List<String> finishOrder = const [],
+}) {
+  final finishRanks = {
+    for (var index = 0; index < finishOrder.length; index++)
+      finishOrder[index]: index,
+  };
   final ordered =
       racers.toList()..sort((a, b) {
+        final aFinishRank = finishRanks[a.menu];
+        final bFinishRank = finishRanks[b.menu];
+        if (aFinishRank != null || bFinishRank != null) {
+          if (aFinishRank == null) return 1;
+          if (bFinishRank == null) return -1;
+          final finishOrder = aFinishRank.compareTo(bFinishRank);
+          if (finishOrder != 0) return finishOrder;
+        }
         final progressOrder = b.progress.compareTo(a.progress);
         return progressOrder != 0
             ? progressOrder
@@ -73,6 +88,7 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
     required this.onWinner,
     this.onStandingsChanged,
     this.onCountdownChanged,
+    this.onRaceComplete,
     int? seed,
   }) : random = Random(seed);
 
@@ -80,9 +96,11 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
   final ValueChanged<String> onWinner;
   final ValueChanged<List<RaceStanding>>? onStandingsChanged;
   final ValueChanged<String?>? onCountdownChanged;
+  final VoidCallback? onRaceComplete;
   final Random random;
 
   final List<Racer> _racers = [];
+  final List<String> _finishOrder = [];
   late final PositionComponent _cameraTarget;
   late double _worldHeight;
   late double _startY;
@@ -92,7 +110,6 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
   double _goTimer = 0;
   int _countdownStep = 3;
   bool _raceStarted = false;
-  bool _finished = false;
 
   List<RaceStanding> get standings => _buildStandings();
   double get cameraTargetY => _cameraTarget.position.y;
@@ -194,7 +211,8 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
     }
   }
 
-  List<RaceStanding> _buildStandings() => buildRaceStandings(_racers);
+  List<RaceStanding> _buildStandings() =>
+      buildRaceStandings(_racers, finishOrder: _finishOrder);
 
   void _updateCountdown(double dt) {
     _countdownRemaining -= dt;
@@ -218,10 +236,11 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
   }
 
   void _finish(String menu) {
-    if (_finished) return;
-    _finished = true;
+    if (_finishOrder.contains(menu)) return;
+    _finishOrder.add(menu);
     _notifyStandings();
-    onWinner(menu);
+    if (_finishOrder.length == 1) onWinner(menu);
+    if (_finishOrder.length == _racers.length) onRaceComplete?.call();
   }
 }
 

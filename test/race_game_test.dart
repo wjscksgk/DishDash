@@ -81,6 +81,20 @@ void main() {
     expect(standings.map((standing) => standing.rank), [1, 2, 3]);
   });
 
+  test('standings keep finished racers in finish order', () {
+    final racers = [
+      buildRacer(number: 5, menu: '초밥', x: 10, y: 100),
+      buildRacer(number: 2, menu: '피자', x: 50, y: 100),
+      buildRacer(number: 7, menu: '돈까스', x: 90, y: 300),
+      buildRacer(number: 4, menu: '파스타', x: 130, y: 180),
+    ];
+
+    final standings = buildRaceStandings(racers, finishOrder: ['초밥', '피자']);
+
+    expect(standings.map((standing) => standing.number), [5, 2, 4, 7]);
+    expect(standings.map((standing) => standing.rank), [1, 2, 3, 4]);
+  });
+
   test(
     'camera target follows the average position of the top three racers',
     () {

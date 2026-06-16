@@ -155,7 +155,7 @@ class _LoadingScreen extends StatelessWidget {
             children: [
               const Spacer(),
               const Text(
-                'AI PIT STOP',
+                'DISH DASH',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: mustard,
@@ -171,7 +171,7 @@ class _LoadingScreen extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: panel,
-                  border: Border.all(color: mint, width: 3),
+                  border: Border.all(color: mustard, width: 3),
                   boxShadow: const [
                     BoxShadow(color: ink, offset: Offset(6, 6)),
                   ],
@@ -188,12 +188,6 @@ class _LoadingScreen extends StatelessWidget {
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
-                    ),
-                    const SizedBox(height: 18),
-                    LinearProgressIndicator(
-                      minHeight: 10,
-                      color: mint,
-                      backgroundColor: cream.withValues(alpha: 0.12),
                     ),
                   ],
                 ),
@@ -226,6 +220,7 @@ class _RaceScreenState extends State<_RaceScreen> {
   String? countdown = '3';
   List<RaceStanding>? _pendingStandings;
   String? _pendingCountdown;
+  String? _winner;
   bool _hasPendingCountdown = false;
   bool _frameUpdateScheduled = false;
 
@@ -245,6 +240,11 @@ class _RaceScreenState extends State<_RaceScreen> {
     onStandingsChanged: _queueStandings,
     onCountdownChanged: _queueCountdown,
     onWinner: (winner) {
+      _winner = winner;
+    },
+    onRaceComplete: () {
+      final winner = _winner;
+      if (winner == null) return;
       Future<void>.delayed(
         const Duration(milliseconds: 800),
         () => widget.controller.finishRace(winner),
@@ -336,7 +336,7 @@ class _ResultScreen extends StatelessWidget {
                 'WINNER',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: tomato,
+                  color: mustard,
                   fontSize: 28,
                   fontWeight: FontWeight.w900,
                 ),
@@ -366,7 +366,7 @@ class _ResultScreen extends StatelessWidget {
               const SizedBox(height: 18),
               _PixelFrame(
                 color: panel,
-                borderColor: mint,
+                borderColor: mustard,
                 shadowColor: ink,
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 76),
@@ -417,7 +417,7 @@ class _ResultScreen extends StatelessWidget {
                   Expanded(
                     child: _PlatformButton(
                       label: '쿠팡이츠',
-                      color: tomato,
+                      color: Colors.white,
                       onPressed:
                           () =>
                               openDeliveryApp(DeliveryApp.coupangEats, winner),
@@ -663,7 +663,7 @@ class _StatusCard extends StatelessWidget {
     final ready = controller.warning == null;
     return _PixelFrame(
       color: panel,
-      borderColor: ready ? mint : mustard,
+      borderColor: mustard,
       shadowColor: ink,
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -672,12 +672,12 @@ class _StatusCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.square, size: 11, color: ready ? mint : mustard),
+                Icon(Icons.square, size: 11, color: mustard),
                 const SizedBox(width: 8),
                 Text(
                   controller.status,
                   style: TextStyle(
-                    color: ready ? mint : mustard,
+                    color: mustard,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0.6,
                   ),
