@@ -87,7 +87,7 @@ class _BootScreen extends StatelessWidget {
           SizedBox(height: 32),
           _PlatformActivityIndicator(),
           SizedBox(height: 14),
-          Text('AI ENGINE WARMING UP'),
+          Text('AI 엔진 로딩 중'),
         ],
       ),
     ),
@@ -556,7 +556,7 @@ class _StandingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPodium = standing.rank <= 3;
+    final isWinner = standing.rank == 1;
     return SizedBox(
       height: 24,
       child: Row(
@@ -565,11 +565,11 @@ class _StandingRow extends StatelessWidget {
             width: 21,
             height: 18,
             alignment: Alignment.center,
-            color: isPodium ? mustard : cream.withValues(alpha: 0.12),
+            color: isWinner ? mustard : cream.withValues(alpha: 0.12),
             child: Text(
               '${standing.rank}',
               style: TextStyle(
-                color: isPodium ? ink : cream,
+                color: isWinner ? ink : cream,
                 fontSize: 11,
                 fontWeight: FontWeight.w900,
               ),
@@ -600,9 +600,9 @@ class _StandingRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: isPodium ? cream : cream.withValues(alpha: 0.82),
+                color: isWinner ? cream : cream.withValues(alpha: 0.82),
                 fontSize: 11,
-                fontWeight: isPodium ? FontWeight.w900 : FontWeight.w700,
+                fontWeight: isWinner ? FontWeight.w900 : FontWeight.w700,
                 height: 1,
               ),
             ),

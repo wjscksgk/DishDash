@@ -28,7 +28,7 @@ class AppController extends ChangeNotifier {
     try {
       await generator.initialize();
       _aiInitialized = true;
-      status = 'AI READY';
+      status = 'AI READY · $llmModelName';
     } catch (error, stackTrace) {
       _aiInitialized = false;
       warning = error.toString();
@@ -52,7 +52,7 @@ class AppController extends ChangeNotifier {
       if (!_aiInitialized) {
         await generator.initialize();
         _aiInitialized = true;
-        status = 'AI READY';
+        status = 'AI READY · $llmModelName';
         notifyListeners();
       }
       await for (final token in generator.generate().timeout(
