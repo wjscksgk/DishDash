@@ -19,8 +19,229 @@ const fallbackMenus = <String>[
   '돈까스',
 ];
 
+class MenuCategory {
+  const MenuCategory({
+    required this.id,
+    required this.label,
+    required this.description,
+    required this.examples,
+    required this.exclusions,
+    required this.fallbackMenus,
+  });
+
+  final String id;
+  final String label;
+  final String description;
+  final List<String> examples;
+  final List<String> exclusions;
+  final List<String> fallbackMenus;
+}
+
+const defaultMenuCategory = MenuCategory(
+  id: 'soup_stew',
+  label: '국/찌개/탕',
+  description: '국밥류, 찌개류, 탕, 국처럼 국물 중심의 따뜻한 식사 메뉴',
+  examples: ['순대국밥', '김치찌개', '감자탕', '삼계탕', '황태국'],
+  exclusions: ['제육국밥', '춘장찌개', '설국밥', '진국밥', '맑은 국밥', '닭한마리탕'],
+  fallbackMenus: [
+    '김치찌개',
+    '순두부찌개',
+    '부대찌개',
+    '된장찌개',
+    '감자탕',
+    '순대국밥',
+    '설렁탕',
+    '갈비탕',
+    '육개장',
+    '해장국',
+  ],
+);
+
+const menuCategories = <MenuCategory>[
+  defaultMenuCategory,
+  MenuCategory(
+    id: 'korean',
+    label: '한식',
+    description: '밥, 찜, 볶음, 국물, 정식 등 한국식 식당 메뉴',
+    examples: ['제육볶음', '비빔밥', '닭갈비', '갈비찜', '김치찜'],
+    exclusions: ['제육국밥', '닭갈비국밥', '불고기찌개', '중식', '일식', '양식'],
+    fallbackMenus: [
+      '제육볶음',
+      '비빔밥',
+      '김치찜',
+      '닭갈비',
+      '갈비찜',
+      '오징어볶음',
+      '낙지볶음',
+      '보쌈',
+      '족발',
+      '불고기',
+    ],
+  ),
+  MenuCategory(
+    id: 'chinese',
+    label: '중식',
+    description: '한국 배달앱에서 판매되는 중국집과 중화요리 메뉴',
+    examples: ['짜장면', '짬뽕', '탕수육', '마라탕', '볶음밥'],
+    exclusions: ['짬뽕순대', '불고기', '탕수육 세트', '짜장면 세트', '일식 라멘', '한식 국밥'],
+    fallbackMenus: [
+      '짜장면',
+      '짬뽕',
+      '탕수육',
+      '마라탕',
+      '마파두부',
+      '양장피',
+      '깐풍기',
+      '고추잡채',
+      '중화볶음밥',
+      '유린기',
+    ],
+  ),
+  MenuCategory(
+    id: 'japanese',
+    label: '일식',
+    description: '초밥, 돈부리, 라멘, 돈가스 등 일본식 식당 메뉴',
+    examples: ['초밥', '라멘', '돈가스', '규동', '우동'],
+    exclusions: ['중식 면요리', '한식 찌개', '양식 파스타'],
+    fallbackMenus: [
+      '초밥',
+      '라멘',
+      '돈가스',
+      '우동',
+      '규동',
+      '가츠동',
+      '사케동',
+      '소바',
+      '오코노미야키',
+      '텐동',
+    ],
+  ),
+  MenuCategory(
+    id: 'western',
+    label: '양식',
+    description: '구체적인 파스타, 피자, 스테이크, 브런치 등 서양식 식당 메뉴',
+    examples: ['크림파스타', '페퍼로니피자', '안심스테이크', '버섯리조또', '라자냐'],
+    exclusions: [
+      '파스타',
+      '피자',
+      '시그니처 파스타',
+      '클래식 피자',
+      '한식 정식',
+      '중식 볶음밥',
+      '일식 돈부리',
+    ],
+    fallbackMenus: [
+      '크림파스타',
+      '페퍼로니피자',
+      '안심스테이크',
+      '버섯리조또',
+      '라자냐',
+      '그라탕',
+      '시저샐러드',
+      '봉골레파스타',
+      '마르게리타피자',
+      '치킨필라프',
+    ],
+  ),
+  MenuCategory(
+    id: 'southeast_asian',
+    label: '동남아',
+    description: '태국, 베트남, 인도네시아 등 동남아 식당 메뉴',
+    examples: ['쌀국수', '팟타이', '분짜', '나시고렝', '똠얌꿍'],
+    exclusions: ['똠얌꿍 볶음', '닭곰탕', '중식 짬뽕', '일식 우동', '한식 국수'],
+    fallbackMenus: [
+      '쌀국수',
+      '팟타이',
+      '분짜',
+      '나시고렝',
+      '미고렝',
+      '똠얌꿍',
+      '반미',
+      '카오팟',
+      '그린커리',
+      '월남쌈',
+    ],
+  ),
+  MenuCategory(
+    id: 'bunsik',
+    label: '분식',
+    description: '분식집에서 흔히 파는 간편한 식사와 간식 메뉴',
+    examples: ['떡볶이', '김밥', '순대', '튀김', '라볶이'],
+    exclusions: ['편의점 제품', '봉지라면 상품명', '카페 디저트'],
+    fallbackMenus: [
+      '떡볶이',
+      '김밥',
+      '순대',
+      '튀김',
+      '라볶이',
+      '쫄면',
+      '어묵',
+      '돈가스김밥',
+      '치즈떡볶이',
+      '김치볶음밥',
+    ],
+  ),
+  MenuCategory(
+    id: 'chicken_fastfood',
+    label: '치킨/패스트푸드',
+    description: '치킨, 버거, 샌드위치처럼 빠르게 먹기 좋은 배달 메뉴',
+    examples: ['후라이드치킨', '양념치킨', '햄버거', '샌드위치', '핫도그'],
+    exclusions: ['브랜드 세트명', '마트 냉동식품', '음료 단품'],
+    fallbackMenus: [
+      '후라이드치킨',
+      '양념치킨',
+      '간장치킨',
+      '햄버거',
+      '치킨버거',
+      '샌드위치',
+      '핫도그',
+      '치킨텐더',
+      '감자튀김',
+      '타코',
+    ],
+  ),
+  MenuCategory(
+    id: 'grill_meat',
+    label: '고기/구이',
+    description: '구이, 바비큐, 고기 덮밥과 고기 중심 식사 메뉴',
+    examples: ['삼겹살', '갈비구이', '불고기', '스테이크덮밥', '닭꼬치'],
+    exclusions: ['해산물 단품', '채식 샐러드', '디저트'],
+    fallbackMenus: [
+      '삼겹살',
+      '갈비구이',
+      '불고기',
+      '돼지갈비',
+      'LA갈비',
+      '닭갈비',
+      '막창구이',
+      '곱창구이',
+      '스테이크덮밥',
+      '닭꼬치',
+    ],
+  ),
+  MenuCategory(
+    id: 'dessert_cafe',
+    label: '디저트/카페',
+    description: '카페와 디저트 가게에서 배달 가능한 단품 디저트 메뉴',
+    examples: ['티라미수', '케이크', '와플', '빙수', '마카롱'],
+    exclusions: ['음료만 있는 항목', '식재료', '브랜드 상품명'],
+    fallbackMenus: [
+      '티라미수',
+      '치즈케이크',
+      '와플',
+      '빙수',
+      '마카롱',
+      '크로플',
+      '도넛',
+      '푸딩',
+      '브라우니',
+      '팬케이크',
+    ],
+  ),
+];
+
 const generatedMenuCount = 14;
-const raceMenuCount = 10;
+const raceMenuCount = 7;
 const maxGenerationRounds = 2;
 const llmModelName = 'Gemma 4 E2B';
 const modelDirectoryName = 'models';
@@ -32,35 +253,37 @@ String buildModelPath(String documentsPath) =>
 
 String buildGenerationPrompt({
   required int count,
+  MenuCategory category = defaultMenuCategory,
   List<String> acceptedMenus = const [],
   List<String> attemptedMenus = const [],
 }) => '''
-한국의 배달 앱에서 식당에 주문할 저녁 메뉴 $count가지를 추천해.
+한국 배달앱 저녁 메뉴 $count개를 추천해.
+카테고리: ${category.label} (${category.description})
+허용 예: ${category.examples.join(', ')}
+금지 예: ${category.exclusions.join(', ')}
 
-아래 조건을 모두 지켜:
-- 식당에서 조리한 뒤 바로 먹을 수 있는 완성 음식만 선택해.
-- 배민이나 쿠팡이츠에서 음식 이름으로 검색했을 때 여러 식당이 판매할 만한 대표 메뉴를 선택해.
-- 편의점이나 마트에서 구매하는 라면 제품, 즉석식품, 냉동식품, 밀키트, 식재료, 과자, 음료는 제외해.
-- 특정 상품명이나 브랜드명은 제외해. 예: 불닭볶음면, 신라면, 비비고 만두.
-- 실제 식당에서 통용되는 기존 메뉴명만 사용하고, 서로 다른 음식 이름을 임의로 합쳐 새 메뉴를 만들지 마.
-- 잘못된 예: 떡볶이 국수, 깻잎밥, 닭갈비볶음, 불닭볶음면.
-- 완전히 같은 메뉴명은 절대로 두 번 적지 마. 작성한 뒤 동일 메뉴가 없는지 다시 확인해.
-- 이름만 조금 다른 사실상 같은 음식은 한 번만 추천해.
-- 핵심 음식명이 같고 '볶음', '구이', '찜', '탕', '정식' 같은 조리 표현만 추가된 메뉴는 중복이야.
-- 잘못된 조합: 닭갈비와 닭갈비볶음, 불고기와 불고기정식, 족발과 족발구이.
-- 위와 같은 중복이 있으면 둘 중 더 일반적이고 짧은 대표 메뉴명 하나만 남기고 전혀 다른 음식으로 교체해.
-- 음식 종류나 카테고리 이름이 아니라 주문 가능한 구체적인 음식 이름을 적어.
-- '~류', '~요리', 한식, 중식, 일식, 양식, 분식, 디저트 같은 포괄적인 분류 표현은 제외해.
-- 잘못된 예: 튀김류, 찌개류, 면 요리, 고기 요리, 한식, 디저트.
-- 올바른 예: 새우튀김, 김치찌개, 짬뽕, 제육볶음, 비빔밥, 티라미수.
-- 각 항목에는 하나의 대표 메뉴명만 적어. 괄호, 슬래시, 선택지, 재료 설명, 부연 설명을 붙이지 마.
-- 잘못된 예: 돈가스 (생선/소고기), 족발/보쌈, 파스타 (크림 또는 토마토).
-- 올바른 예: 돈가스, 족발, 파스타.
-- 출력 전에 각 항목이 식당 배달 메뉴인지 스스로 확인하고 조건에 맞지 않으면 교체해.
+규칙:
+- 반드시 이 카테고리 안의 실제 대표 메뉴명만 써.
+- 배달앱에서 자연스러운 완성 음식만 써.
+- 브랜드/상품/라면/즉석/냉동/밀키트/식재료/과자/음료 제외.
+- 카테고리명, ~류, ~요리, 한식/중식/일식/양식/분식/디저트 제외.
+- 세트/콤보/모둠/정식/코스 제외: 탕수육 세트.
+- 창작·합성 메뉴 제외: 떡볶이 국수, 깻잎밥, 닭갈비볶음, 짬뽕순대.
+- 선택 카테고리 밖 대표 메뉴 제외: 중식에서 불고기 금지.
+- 기존 메뉴명끼리 섞지 마: 제육+국밥=제육국밥, 불고기+찌개=불고기찌개 금지.
+- 외국 메뉴명+볶음/탕/국/국밥 금지: 똠얌꿍 볶음.
+- 일반/마케팅 수식어로 새 이름 만들지 마: 진한, 맑은, 얼큰한, 시원한, 시그니처, 클래식, 프리미엄, 스페셜.
+- 양식: 파스타, 피자 단독명 금지. 파스타/피자/스테이크/리조또류 각 최대 2개.
+- 국/찌개/탕에서는 수식어+국밥/국/탕/찌개 금지: 진국밥, 맑은 국밥, 얼큰한 국.
+- 국밥은 실제 국밥 메뉴만. 제육국밥처럼 볶음/고기 메뉴에 국밥을 붙이지 마.
+- 국/찌개/탕에서는 소스/양념/추상어+찌개/국밥 합성 금지: 춘장찌개, 설국밥.
+- 닭 국물 메뉴는 삼계탕, 닭곰탕, 닭개장처럼 통용 메뉴명만. 닭한마리탕 제외.
+- 같은 메뉴나 핵심 음식이 같은 변형은 한 번만.
+- 괄호, 슬래시, 선택지, 설명 없이 음식명 하나만.
 ${acceptedMenus.isEmpty ? '' : '- 이미 통과한 다음 메뉴는 제외해: ${acceptedMenus.join(', ')}'}
 ${attemptedMenus.isEmpty ? '' : '- 이전에 제안한 다음 메뉴도 다시 제안하지 마: ${attemptedMenus.join(', ')}'}
 
-다음 형식으로만 응답해. 번호와 음식 이름 외 어떤 텍스트도 포함하지 마.
+번호와 음식 이름만 출력:
 ${List.generate(count, (index) => '${index + 1}. [음식이름]').join('\n')}
 ''';
 
@@ -93,41 +316,89 @@ String buildWinnerCommentPrompt(String menu) => '''
 설명이나 접두어 없이 한마디만 출력해.
 ''';
 
-String buildValidationPrompt(String candidates) => '''
-아래 목록은 다른 AI가 만든 배달 음식 후보야. 각 항목을 검수하고 통과할 항목의 번호만 선택해.
+String buildValidationPrompt(
+  String candidates, {
+  MenuCategory category = defaultMenuCategory,
+}) => '''
+통과 번호만 골라.
+카테고리: ${category.label}
+허용: ${category.examples.join(', ')}
+금지: ${category.exclusions.join(', ')}
 
-검수 기준:
-- 한국 배달 앱에서 식당이 조리해 판매하는 음식으로 자연스럽게 이해되면 통과시켜.
-- 명백한 라면 제품, 브랜드 상품, 편의점·마트 상품, 밀키트, 식재료만 제외해.
-- 실제 음식으로 보기 어려운 명백한 창작 조합이나 억지로 합친 이름만 제외해.
-- '~류', '~요리'처럼 구체적인 음식이 아닌 카테고리명만 제외해.
-- 괄호 안 설명이나 부연 문구가 있어도 앞부분이 정상적인 메뉴명이면 그 원래 항목을 통과시켜.
-- 같은 음식, 표기만 다른 음식, 핵심 음식이 같은 변형 메뉴는 하나만 남겨.
-- 일반적인 식당 메뉴일 가능성이 높으면 통과시키고, 명백히 기준을 어길 때만 제외해.
-- 일반적인 배달 음식은 적극적으로 통과시켜.
-- 후보에 없는 메뉴를 새로 만들지 마.
-- 음식 이름을 다시 작성하지 마.
+통과: 카테고리 안의 완성 음식.
+제외: 카테고리 밖, 브랜드/상품/라면/즉석/밀키트/식재료, 카테고리명, ~류/~요리, 창작·합성, 중복 변형.
+제외: 세트/콤보/모둠/정식/코스. 예: 탕수육 세트.
+제외: 카테고리 밖 대표 메뉴. 예: 중식에서 불고기.
+제외: 금지 예나 명백히 만든 이름.
+제외: 메뉴명끼리 섞은 이름. 예: 제육국밥, 닭갈비국밥, 불고기찌개, 짬뽕순대.
+제외: 외국 메뉴명+볶음/탕/국/국밥. 예: 똠얌꿍 볶음.
+제외: 진한/맑은/얼큰한/시원한/시그니처/클래식/프리미엄/스페셜 같은 수식어로 만든 이름.
+양식: 파스타/피자 단독명 제외, 파스타/피자/스테이크/리조또류 각 2개.
+국/찌개/탕이면 진국밥, 맑은 국밥, 얼큰한 국, 시원한 탕처럼 수식어+국밥/국/탕/찌개 제외.
+국밥은 실제 국밥만. 제육국밥처럼 볶음/고기 메뉴+국밥 합성은 제외.
+국/찌개/탕에서 춘장찌개, 설국밥처럼 소스/양념/추상어+찌개/국밥 합성은 제외.
+닭한마리탕은 제외. 닭 국물 메뉴는 삼계탕, 닭곰탕, 닭개장처럼 통용 이름만 통과.
+후보에 없는 메뉴를 만들거나 이름을 고치지 마.
 
-후보 목록:
-<candidates>
+후보:
 $candidates
-</candidates>
 
-반드시 다음 형식 한 줄로만 응답해:
+형식:
 통과: 1, 2, 3
 
-통과 항목이 하나도 없으면 다음과 같이 응답해:
+없으면:
 통과: 없음
 ''';
 
-List<String> parseMenus(String raw) {
+List<String> parseMenus(
+  String raw, {
+  List<String> fallbackMenuPool = fallbackMenus,
+  MenuCategory? category,
+}) {
   final parsed = parseMenuCandidates(raw, limit: raceMenuCount);
+  return fillMenusWithFallback(parsed, fallbackMenuPool, category: category);
+}
 
-  for (final fallback in fallbackMenus) {
-    if (parsed.length == raceMenuCount) break;
-    if (!_containsEquivalentMenu(parsed, fallback)) parsed.add(fallback);
+List<String> fillMenusWithFallback(
+  List<String> menus,
+  List<String> fallbackMenuPool, {
+  int count = raceMenuCount,
+  MenuCategory? category,
+}) {
+  final filled = <String>[];
+  final familyCounts = <String, int>{};
+
+  bool canAdd(String menu) {
+    if (_containsEquivalentMenu(filled, menu)) return false;
+    final family = _limitedMenuFamily(menu, category);
+    if (family == null) return true;
+    final currentCount = familyCounts[family] ?? 0;
+    if (currentCount >= 2) return false;
+    familyCounts[family] = currentCount + 1;
+    return true;
   }
-  return parsed;
+
+  for (final menu in menus) {
+    if (filled.length == count) break;
+    if (canAdd(menu)) filled.add(menu);
+  }
+  for (final fallback in fallbackMenuPool) {
+    if (filled.length == count) break;
+    if (canAdd(fallback)) filled.add(fallback);
+  }
+  return filled;
+}
+
+String? _limitedMenuFamily(String menu, MenuCategory? category) {
+  if (category?.id != 'western') return null;
+  final key = _menuComparisonKey(menu);
+  if (key.contains('파스타') || key.contains('스파게티') || key == '알리오올리오') {
+    return 'pasta';
+  }
+  if (key.contains('피자')) return 'pizza';
+  if (key.contains('스테이크')) return 'steak';
+  if (key.contains('리조또')) return 'risotto';
+  return null;
 }
 
 List<String> parseMenuCandidates(String raw, {int? limit}) {
@@ -193,7 +464,7 @@ String _menuComparisonKey(String menu) {
 abstract interface class MenuGenerator {
   Future<String> get modelPath;
   Future<void> initialize();
-  Stream<String> generate();
+  Stream<String> generate(MenuCategory category);
   Stream<String> generateWinnerComment(String menu);
   Future<void> dispose();
 }
@@ -250,7 +521,7 @@ class FlutterGemmaMenuGenerator implements MenuGenerator {
   }
 
   @override
-  Stream<String> generate() async* {
+  Stream<String> generate(MenuCategory category) async* {
     final model = _model;
     if (model == null) throw StateError('Model is not initialized.');
 
@@ -267,6 +538,7 @@ class FlutterGemmaMenuGenerator implements MenuGenerator {
       debugPrint('Dish Dash: generation round ${round + 1} started.');
       final generationPrompt = buildGenerationPrompt(
         count: generatedMenuCount,
+        category: category,
         acceptedMenus: accepted,
         attemptedMenus: attempted,
       );
@@ -304,7 +576,7 @@ class FlutterGemmaMenuGenerator implements MenuGenerator {
           .join('\n');
       final validatedRaw = await _runChat(
         model,
-        buildValidationPrompt(candidateText),
+        buildValidationPrompt(candidateText, category: category),
         temperature: 0.2,
       );
       final retained = retainValidatedCandidates(candidates, validatedRaw);
@@ -319,14 +591,18 @@ class FlutterGemmaMenuGenerator implements MenuGenerator {
       );
     }
 
+    accepted.shuffle(random);
     if (accepted.length < raceMenuCount) {
-      throw MenuValidationException(
-        '검수를 통과한 메뉴가 부족합니다: ${accepted.length}/$raceMenuCount',
+      debugPrint(
+        'Dish Dash: validation accepted ${accepted.length}/$raceMenuCount; '
+        'filling remaining menus from ${category.label} fallback.',
       );
     }
-
-    accepted.shuffle(random);
-    final finalMenus = accepted.take(raceMenuCount).toList(growable: false);
+    final finalMenus = fillMenusWithFallback(
+      accepted,
+      category.fallbackMenus,
+      category: category,
+    ).toList(growable: false);
     final finalOutput = finalMenus
         .asMap()
         .entries
