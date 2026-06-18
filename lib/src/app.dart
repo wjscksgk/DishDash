@@ -83,8 +83,6 @@ class _BootScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _Logo(),
-          SizedBox(height: 32),
           _PlatformActivityIndicator(),
           SizedBox(height: 14),
           Text('AI 엔진 로딩 중'),
