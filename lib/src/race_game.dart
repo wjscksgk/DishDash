@@ -87,7 +87,6 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
     required this.menus,
     required this.onWinner,
     this.onStandingsChanged,
-    this.onCountdownChanged,
     this.onRaceComplete,
     int? seed,
   }) : random = Random(seed);
@@ -95,7 +94,6 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
   final List<String> menus;
   final ValueChanged<String> onWinner;
   final ValueChanged<List<RaceStanding>>? onStandingsChanged;
-  final ValueChanged<String?>? onCountdownChanged;
   final VoidCallback? onRaceComplete;
   final Random random;
 
@@ -106,10 +104,6 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
   late double _startY;
   late double _finishY;
   double _standingsTimer = 0;
-  double _countdownRemaining = 1.8;
-  double _goTimer = 0;
-  int _countdownStep = 3;
-  bool _raceStarted = false;
 
   List<RaceStanding> get standings => _buildStandings();
   double get cameraTargetY => _cameraTarget.position.y;
@@ -158,7 +152,6 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
         random: random,
         startY: _startY,
         finishY: _finishY,
-        isRunning: false,
         position: Vector2(
           laneLeft + (laneWidth - racerWidth) / 2,
           _startY + (index.isEven ? 4 : 0),
@@ -184,7 +177,6 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
       considerViewport: true,
     );
     camera.follow(_cameraTarget, maxSpeed: 540, verticalOnly: true, snap: true);
-    onCountdownChanged?.call('3');
     _notifyStandings();
   }
 
@@ -192,15 +184,6 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
   void update(double dt) {
     super.update(dt);
     if (_racers.isEmpty) return;
-
-    if (!_raceStarted) {
-      _updateCountdown(dt);
-      return;
-    }
-    if (_goTimer > 0) {
-      _goTimer -= dt;
-      if (_goTimer <= 0) onCountdownChanged?.call(null);
-    }
 
     _cameraTarget.position.y = calculateLeaderTargetY(_racers);
 
@@ -213,23 +196,6 @@ class DishDashGame extends FlameGame with HasCollisionDetection {
 
   List<RaceStanding> _buildStandings() =>
       buildRaceStandings(_racers, finishOrder: _finishOrder);
-
-  void _updateCountdown(double dt) {
-    _countdownRemaining -= dt;
-    final nextStep = max(1, (_countdownRemaining / 0.6).ceil());
-    if (_countdownRemaining > 0 && nextStep != _countdownStep) {
-      _countdownStep = nextStep;
-      onCountdownChanged?.call('$nextStep');
-    }
-    if (_countdownRemaining > 0) return;
-
-    _raceStarted = true;
-    _goTimer = 0.55;
-    for (final racer in _racers) {
-      racer.isRunning = true;
-    }
-    onCountdownChanged?.call('GO!');
-  }
 
   void _notifyStandings() {
     onStandingsChanged?.call(_buildStandings());

@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 
 import 'app_controller.dart';
 import 'delivery_launcher.dart';
@@ -128,35 +127,16 @@ class _StartScreen extends StatelessWidget {
                         const SizedBox(height: 20),
                         _CategorySelector(controller: controller),
                         const SizedBox(height: 16),
-                        _MenuPreviewPanel(controller: controller),
-                        if (controller.isPreviewGenerating ||
-                            controller.previewMenus.isNotEmpty ||
-                            controller.previewWarning != null)
-                          const SizedBox(height: 16),
                         _StatusCard(controller: controller),
                         const SizedBox(height: 18),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _PlatformButton(
-                                label: 'MENU TEST',
-                                icon: Icons.receipt_long_rounded,
-                                cupertinoIcon: CupertinoIcons.doc_text_fill,
-                                color: mint,
-                                onPressed:
-                                    controller.previewMenusForSelectedCategory,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _PlatformButton(
-                                label: 'RACE START',
-                                icon: Icons.flag_rounded,
-                                cupertinoIcon: CupertinoIcons.flag_fill,
-                                onPressed: controller.generateMenus,
-                              ),
-                            ),
-                          ],
+                        _PlatformButton(
+                          label: 'RACE START',
+                          icon: Icons.flag_rounded,
+                          cupertinoIcon: CupertinoIcons.flag_fill,
+                          onPressed:
+                              controller.selectedCategory == null
+                                  ? null
+                                  : controller.generateMenus,
                         ),
                         const SizedBox(height: 22),
                       ],
@@ -248,11 +228,8 @@ class _RaceScreen extends StatefulWidget {
 }
 
 class _RaceScreenState extends State<_RaceScreen> {
-  String? countdown = '3';
   List<RaceStanding>? _pendingStandings;
-  String? _pendingCountdown;
   String? _winner;
-  bool _hasPendingCountdown = false;
   bool _frameUpdateScheduled = false;
 
   late List<RaceStanding> standings = [
@@ -269,7 +246,6 @@ class _RaceScreenState extends State<_RaceScreen> {
   late final DishDashGame game = DishDashGame(
     menus: widget.controller.menus,
     onStandingsChanged: _queueStandings,
-    onCountdownChanged: _queueCountdown,
     onWinner: (winner) {
       _winner = winner;
     },
@@ -288,12 +264,6 @@ class _RaceScreenState extends State<_RaceScreen> {
     _scheduleFrameUpdate();
   }
 
-  void _queueCountdown(String? value) {
-    _pendingCountdown = value;
-    _hasPendingCountdown = true;
-    _scheduleFrameUpdate();
-  }
-
   void _scheduleFrameUpdate() {
     if (_frameUpdateScheduled) return;
     _frameUpdateScheduled = true;
@@ -302,14 +272,10 @@ class _RaceScreenState extends State<_RaceScreen> {
       if (!mounted) return;
 
       final nextStandings = _pendingStandings;
-      final hasCountdown = _hasPendingCountdown;
-      final nextCountdown = _pendingCountdown;
       _pendingStandings = null;
-      _hasPendingCountdown = false;
 
       setState(() {
         if (nextStandings != null) standings = nextStandings;
-        if (hasCountdown) countdown = nextCountdown;
       });
     });
   }
@@ -336,8 +302,6 @@ class _RaceScreenState extends State<_RaceScreen> {
                   right: 10,
                   child: _RaceStandingsBoard(standings: standings),
                 ),
-                if (countdown != null)
-                  Center(child: _RaceCountdownLabel(text: countdown!)),
               ],
             ),
           ),
@@ -552,34 +516,6 @@ class _RaceStandingsBoard extends StatelessWidget {
   }
 }
 
-class _RaceCountdownLabel extends StatelessWidget {
-  const _RaceCountdownLabel({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 92),
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-      decoration: BoxDecoration(
-        color: ink.withValues(alpha: 0.9),
-        border: Border.all(color: mustard, width: 3),
-      ),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: cream,
-          fontSize: 34,
-          height: 1,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
-}
-
 class _StandingRow extends StatelessWidget {
   const _StandingRow({required this.standing});
 
@@ -717,10 +653,6 @@ class _StatusCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (controller.previewMenus.isNotEmpty) ...[
-                  const SizedBox(width: 8),
-                  _CopyPreviewButton(text: controller.previewText),
-                ],
               ],
             ),
             if (!ready) ...[
@@ -734,161 +666,6 @@ class _StatusCard extends StatelessWidget {
             ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MenuPreviewPanel extends StatelessWidget {
-  const _MenuPreviewPanel({required this.controller});
-
-  final AppController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!controller.isPreviewGenerating &&
-        controller.previewMenus.isEmpty &&
-        controller.previewWarning == null) {
-      return const SizedBox.shrink();
-    }
-
-    return _PixelFrame(
-      color: ink.withValues(alpha: 0.9),
-      borderColor: controller.previewUsingFallback ? mustard : mint,
-      shadowColor: ink,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  controller.isPreviewGenerating
-                      ? Icons.hourglass_top_rounded
-                      : Icons.list_alt_rounded,
-                  size: 16,
-                  color: mint,
-                ),
-                const SizedBox(width: 7),
-                Expanded(
-                  child: Text(
-                    controller.isPreviewGenerating
-                        ? 'GENERATING ${controller.selectedCategory.label}'
-                        : 'MENU TEST · ${controller.selectedCategory.label}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: mint,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            if (controller.previewWarning != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                controller.previewWarning!,
-                style: const TextStyle(color: mustard, fontSize: 11),
-              ),
-            ],
-            if (controller.isPreviewGenerating) ...[
-              const SizedBox(height: 12),
-              const _PlatformActivityIndicator(),
-            ],
-            if (controller.previewMenus.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              for (
-                var index = 0;
-                index < controller.previewMenus.length;
-                index++
-              )
-                _PreviewMenuRow(
-                  number: index + 1,
-                  menu: controller.previewMenus[index],
-                ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CopyPreviewButton extends StatelessWidget {
-  const _CopyPreviewButton({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 32,
-      child: FilledButton.icon(
-        style: FilledButton.styleFrom(
-          backgroundColor: mint,
-          foregroundColor: ink,
-          padding: const EdgeInsets.symmetric(horizontal: 9),
-          textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w900),
-          shape: const BeveledRectangleBorder(),
-          side: const BorderSide(color: cream, width: 1.5),
-        ),
-        onPressed: () async {
-          await Clipboard.setData(ClipboardData(text: text));
-          if (!context.mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('메뉴 리스트를 복사했습니다.'),
-              duration: Duration(milliseconds: 1200),
-            ),
-          );
-        },
-        icon: const Icon(Icons.copy_rounded, size: 15),
-        label: const Text('COPY'),
-      ),
-    );
-  }
-}
-
-class _PreviewMenuRow extends StatelessWidget {
-  const _PreviewMenuRow({required this.number, required this.menu});
-
-  final int number;
-  final String menu;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 22,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 26,
-            child: Text(
-              '$number.',
-              style: const TextStyle(
-                color: mustard,
-                fontSize: 12,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              menu,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: cream,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -927,13 +704,14 @@ class _CategorySelector extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Wrap(
+              alignment: WrapAlignment.center,
               spacing: 8,
               runSpacing: 8,
               children: [
                 for (final category in menuCategories)
                   _CategoryButton(
                     category: category,
-                    selected: controller.selectedCategory.id == category.id,
+                    selected: controller.selectedCategory?.id == category.id,
                     onPressed: () => controller.selectCategory(category),
                   ),
               ],
@@ -954,7 +732,7 @@ class _CategoryButton extends StatelessWidget {
 
   final MenuCategory category;
   final bool selected;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -1003,7 +781,7 @@ class _PlatformButton extends StatelessWidget {
   });
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final IconData? icon;
   final IconData? cupertinoIcon;
   final Color color;
@@ -1011,13 +789,21 @@ class _PlatformButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final buttonIcon = _usesCupertino ? cupertinoIcon ?? icon : icon;
+    final enabled = onPressed != null;
+    final effectiveColor = enabled ? color : color.withValues(alpha: 0.38);
     if (_usesCupertino) {
       return Container(
         height: 52,
         decoration: BoxDecoration(
-          color: color,
-          border: Border.all(color: cream, width: 3),
-          boxShadow: const [BoxShadow(color: ink, offset: Offset(5, 5))],
+          color: effectiveColor,
+          border: Border.all(
+            color: enabled ? cream : cream.withValues(alpha: 0.35),
+            width: 3,
+          ),
+          boxShadow:
+              enabled
+                  ? const [BoxShadow(color: ink, offset: Offset(5, 5))]
+                  : const [],
         ),
         child: CupertinoButton(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -1034,7 +820,9 @@ class _PlatformButton extends StatelessWidget {
       child: FilledButton(
         style: FilledButton.styleFrom(
           backgroundColor: color,
+          disabledBackgroundColor: effectiveColor,
           foregroundColor: ink,
+          disabledForegroundColor: ink.withValues(alpha: 0.55),
           textStyle: const TextStyle(
             fontWeight: FontWeight.w900,
             letterSpacing: 0.8,

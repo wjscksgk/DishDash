@@ -359,7 +359,7 @@ void main() {
 
   test('uses category fallback list for invalid output', () {
     final category = menuCategories.firstWhere(
-      (category) => category.id == 'dessert_cafe',
+      (category) => category.id == 'grill_meat',
     );
 
     expect(

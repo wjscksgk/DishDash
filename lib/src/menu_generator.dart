@@ -58,7 +58,6 @@ const defaultMenuCategory = MenuCategory(
 );
 
 const menuCategories = <MenuCategory>[
-  defaultMenuCategory,
   MenuCategory(
     id: 'korean',
     label: '한식',
@@ -219,25 +218,7 @@ const menuCategories = <MenuCategory>[
       '닭꼬치',
     ],
   ),
-  MenuCategory(
-    id: 'dessert_cafe',
-    label: '디저트/카페',
-    description: '카페와 디저트 가게에서 배달 가능한 단품 디저트 메뉴',
-    examples: ['티라미수', '케이크', '와플', '빙수', '마카롱'],
-    exclusions: ['음료만 있는 항목', '식재료', '브랜드 상품명'],
-    fallbackMenus: [
-      '티라미수',
-      '치즈케이크',
-      '와플',
-      '빙수',
-      '마카롱',
-      '크로플',
-      '도넛',
-      '푸딩',
-      '브라우니',
-      '팬케이크',
-    ],
-  ),
+  defaultMenuCategory,
 ];
 
 const generatedMenuCount = 14;

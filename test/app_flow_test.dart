@@ -60,6 +60,7 @@ void main() {
     await controller.initialize();
     expect(controller.stage, AppStage.ready);
 
+    controller.selectCategory(menuCategories.first);
     await controller.generateMenus();
     expect(controller.stage, AppStage.racing);
     expect(controller.menus, hasLength(raceMenuCount));
@@ -79,6 +80,7 @@ void main() {
         generator: FakeMenuGenerator(failWinnerComment: true),
       );
       await controller.initialize();
+      controller.selectCategory(menuCategories.first);
       await controller.generateMenus();
 
       controller.finishRace('피자');
@@ -93,6 +95,7 @@ void main() {
   test('generation failure keeps the flow alive with fallback', () async {
     final controller = AppController(generator: FakeMenuGenerator(fail: true));
     await controller.initialize();
+    controller.selectCategory(defaultMenuCategory);
     await controller.generateMenus();
 
     expect(controller.stage, AppStage.racing);
@@ -133,41 +136,6 @@ void main() {
     expect(controller.menus, category.fallbackMenus.take(raceMenuCount));
   });
 
-  test('preview generation keeps the app ready and records menus', () async {
-    final generator = FakeMenuGenerator();
-    final controller = AppController(generator: generator);
-    await controller.initialize();
-    final category = menuCategories.firstWhere(
-      (category) => category.id == 'japanese',
-    );
-    controller.selectCategory(category);
-
-    await controller.previewMenusForSelectedCategory();
-
-    expect(controller.stage, AppStage.ready);
-    expect(generator.lastGeneratedCategory, category);
-    expect(controller.previewMenus, hasLength(raceMenuCount));
-    expect(controller.previewText, contains('1. 치킨'));
-    expect(controller.previewText, contains('7. 짜장면'));
-    expect(controller.isPreviewGenerating, isFalse);
-  });
-
-  test('preview generation failure uses selected category fallback', () async {
-    final controller = AppController(generator: FakeMenuGenerator(fail: true));
-    await controller.initialize();
-    final category = menuCategories.firstWhere(
-      (category) => category.id == 'dessert_cafe',
-    );
-    controller.selectCategory(category);
-
-    await controller.previewMenusForSelectedCategory();
-
-    expect(controller.stage, AppStage.ready);
-    expect(controller.previewUsingFallback, isTrue);
-    expect(controller.previewMenus, category.fallbackMenus.take(raceMenuCount));
-    expect(controller.previewWarning, contains('AI 생성 실패'));
-  });
-
   test('retries initialization before generation', () async {
     final controller = AppController(
       generator: FakeMenuGenerator(initializationFailures: 1),
@@ -175,10 +143,25 @@ void main() {
     await controller.initialize();
     expect(controller.status, 'DEMO MODE');
 
+    controller.selectCategory(menuCategories.first);
     await controller.generateMenus();
 
     expect(controller.usingFallback, isFalse);
     expect(controller.menus, hasLength(raceMenuCount));
+  });
+
+  test('starts without a selected category', () async {
+    final generator = FakeMenuGenerator();
+    final controller = AppController(generator: generator);
+    await controller.initialize();
+
+    expect(controller.selectedCategory, isNull);
+
+    await controller.generateMenus();
+
+    expect(controller.stage, AppStage.ready);
+    expect(controller.menus, isEmpty);
+    expect(generator.lastGeneratedCategory, isNull);
   });
 
   testWidgets('uses Material actions on Android', (tester) async {
@@ -188,7 +171,7 @@ void main() {
 
     await tester.pumpWidget(DishDashApp(controller: controller));
 
-    expect(find.byType(FilledButton), findsNWidgets(2));
+    expect(find.byType(FilledButton), findsOneWidget);
     expect(find.byType(CupertinoButton), findsNothing);
     debugDefaultTargetPlatformOverride = null;
   });
@@ -200,7 +183,7 @@ void main() {
 
     await tester.pumpWidget(DishDashApp(controller: controller));
 
-    expect(find.byType(CupertinoButton), findsNWidgets(2));
+    expect(find.byType(CupertinoButton), findsOneWidget);
     expect(find.byType(FilledButton), findsNothing);
     debugDefaultTargetPlatformOverride = null;
   });
@@ -221,7 +204,7 @@ void main() {
     expect(find.byType(LinearProgressIndicator), findsNothing);
   });
 
-  testWidgets('start screen offers ten fixed menu categories', (tester) async {
+  testWidgets('start screen offers nine fixed menu categories', (tester) async {
     tester.view.physicalSize = const Size(320, 640);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -232,32 +215,19 @@ void main() {
 
     await tester.pumpWidget(DishDashApp(controller: controller));
 
+    expect(menuCategories, hasLength(9));
+    expect(menuCategories.last.label, '국/찌개/탕');
+    expect(controller.selectedCategory, isNull);
     for (final category in menuCategories) {
       expect(find.text(category.label), findsOneWidget);
     }
+    expect(
+      tester
+          .widget<FilledButton>(find.widgetWithText(FilledButton, 'RACE START'))
+          .onPressed,
+      isNull,
+    );
     expect(find.text('CATEGORY SELECT'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('menu test button shows generated menus on the start screen', (
-    tester,
-  ) async {
-    final controller = AppController(generator: FakeMenuGenerator());
-    await controller.initialize();
-
-    await tester.pumpWidget(DishDashApp(controller: controller));
-    expect(find.text('MENU TEST'), findsOneWidget);
-
-    controller.previewMenus = fallbackMenus.take(raceMenuCount).toList();
-    controller.previewText = '1. 치킨\n2. 피자';
-    controller.notifyListeners();
-    await tester.pump();
-
-    expect(controller.stage, AppStage.ready);
-    expect(find.text('MENU TEST · 국/찌개/탕'), findsOneWidget);
-    expect(find.text('COPY'), findsOneWidget);
-    expect(find.text('치킨'), findsOneWidget);
-    expect(find.text('짜장면'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -280,6 +250,7 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await tester.pump();
 
+    expect(find.text('GO!'), findsNothing);
     for (final menu in controller.menus) {
       expect(find.text(menu), findsOneWidget);
     }

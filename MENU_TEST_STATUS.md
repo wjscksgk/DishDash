@@ -7,9 +7,8 @@
 - 카테고리 선택 기능 추가 완료
 - 선택 카테고리 기준 LLM 메뉴 생성 프롬프트 적용 완료
 - 메뉴 생성 개수는 최종 7개로 조정 완료
-- 레이스와 별개로 메뉴 생성 결과를 확인하는 `MENU TEST` 버튼 추가 완료
-- 생성 메뉴 리스트 복사 버튼 추가 완료
 - LLM 검증 실패 시 앱이 중단되지 않고 카테고리 fallback으로 채우도록 조정 완료
+- 전체 카테고리 수동 검수 완료 후 `MENU TEST` 버튼과 미리보기 기능 제거 완료
 
 ## 수동 LLM 테스트 완료 카테고리
 
@@ -37,7 +36,6 @@
 - `분식`
 - `치킨/패스트푸드`
 - `고기/구이`
-- `디저트/카페`
 
 ## 자동 검증 현황
 
@@ -90,23 +88,11 @@ flutter run -d macos
 - `분식`
 - `치킨/패스트푸드`
 - `고기/구이`
-- `디저트/카페`
 
 ## 배포 전 제거 또는 결정 필요 항목
 
-아래 항목은 카테고리별 LLM 검수 편의를 위해 추가된 성격이 강하므로, 배포 전 제품 기능으로 남길지 결정해야 한다.
+아래 항목은 배포 전 노출 필요성을 결정해야 한다.
 
-- `lib/src/app.dart`
-  - 시작 화면의 `MENU TEST` 버튼
-  - 메뉴 미리보기 패널
-  - 메뉴 리스트 `COPY` 버튼
-- `lib/src/app_controller.dart`
-  - `previewMenusForSelectedCategory`
-  - `previewMenus`, `previewText`, `previewWarning`, `previewUsingFallback`
-  - `Dish Dash preview menus...` debug 로그
-- `test/app_flow_test.dart`
-  - `MENU TEST` UI와 preview 상태를 검증하는 테스트
-  - 위 UI를 제거하면 함께 삭제 또는 수정 필요
 - `lib/src/menu_generator.dart`
   - `Dish Dash final race menus` debug 로그는 출시 빌드에서 노출 필요성이 낮으므로 제거 또는 debug 모드 한정 처리 검토
   - generation/validation round debug 로그도 출시 전에 로그 레벨 또는 debug 모드 한정 처리 검토
