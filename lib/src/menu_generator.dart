@@ -466,6 +466,16 @@ class FlutterGemmaMenuGenerator implements MenuGenerator {
       }
     }
 
+    if (Platform.isWindows) {
+      final userProfile = Platform.environment['USERPROFILE'];
+      if (userProfile != null) {
+        final localDocumentsPath = buildModelPath(
+          '$userProfile${Platform.pathSeparator}Documents',
+        );
+        if (await File(localDocumentsPath).exists()) return localDocumentsPath;
+      }
+    }
+
     final documents = await getApplicationDocumentsDirectory();
     return buildModelPath(documents.path);
   }
