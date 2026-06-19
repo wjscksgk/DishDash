@@ -48,6 +48,9 @@ app.*.map.json
 # Node.js
 node_modules/
 
+# Claude Code local settings
+.claude/
+
 # Local AI models and generated native frameworks
 *.litertlm
 /models/
