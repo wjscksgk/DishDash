@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "@anthropic-ai/claude-code": "^2.1.183",
+    "docx": "^9.7.1"
+  },
+  "name": "dishdash",
+  "version": "1.0.0",
+  "description": "Gemma 4가 배달 메뉴 후보 14개를 생성하고 별도 검수 채팅이 유효한 항목만 통과시킵니다. 부족하면 한 번 더 생성과 검수를 수행한 뒤 무작위로 고른 7개가 Flame 레이스로 오늘의 메뉴를 결정하는 Flutter 앱입니다.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wjscksgk/DishDash.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/wjscksgk/DishDash/issues"
+  },
+  "homepage": "https://github.com/wjscksgk/DishDash#readme"
+}

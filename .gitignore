@@ -45,6 +45,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Node.js
+node_modules/
+
 # Local AI models and generated native frameworks
 *.litertlm
 /models/
