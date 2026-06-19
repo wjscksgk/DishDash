@@ -131,8 +131,6 @@ class _StartScreen extends StatelessWidget {
                         const SizedBox(height: 18),
                         _PlatformButton(
                           label: 'RACE START',
-                          icon: Icons.flag_rounded,
-                          cupertinoIcon: CupertinoIcons.flag_fill,
                           onPressed:
                               controller.selectedCategory == null
                                   ? null
@@ -192,7 +190,7 @@ class _LoadingScreen extends StatelessWidget {
                     const _PlatformActivityIndicator(),
                     const SizedBox(height: 20),
                     const Text(
-                      'AI 주방장, 오늘의 메뉴 조합 중!',
+                      'AI가 메뉴를 생성중입니다',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: cream,
@@ -775,20 +773,15 @@ class _PlatformButton extends StatelessWidget {
   const _PlatformButton({
     required this.label,
     required this.onPressed,
-    this.icon,
-    this.cupertinoIcon,
     this.color = mustard,
   });
 
   final String label;
   final VoidCallback? onPressed;
-  final IconData? icon;
-  final IconData? cupertinoIcon;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    final buttonIcon = _usesCupertino ? cupertinoIcon ?? icon : icon;
     final enabled = onPressed != null;
     final effectiveColor = enabled ? color : color.withValues(alpha: 0.38);
     if (_usesCupertino) {
@@ -809,12 +802,12 @@ class _PlatformButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           borderRadius: BorderRadius.zero,
           onPressed: onPressed,
-          child: _ButtonContent(label: label, icon: buttonIcon, color: ink),
+          child: _ButtonContent(label: label, color: ink),
         ),
       );
     }
 
-    final child = _ButtonContent(label: label, icon: icon, color: ink);
+    final child = _ButtonContent(label: label, color: ink);
     return SizedBox(
       height: 52,
       child: FilledButton(
@@ -840,10 +833,9 @@ class _PlatformButton extends StatelessWidget {
 }
 
 class _ButtonContent extends StatelessWidget {
-  const _ButtonContent({required this.label, this.icon, this.color});
+  const _ButtonContent({required this.label, this.color});
 
   final String label;
-  final IconData? icon;
   final Color? color;
 
   @override
@@ -852,10 +844,6 @@ class _ButtonContent extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (icon != null) ...[
-          Icon(icon, size: 20, color: color),
-          const SizedBox(width: 8),
-        ],
         Flexible(
           child: Text(
             label,

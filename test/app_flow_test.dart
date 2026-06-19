@@ -199,7 +199,7 @@ void main() {
     await tester.pumpWidget(DishDashApp(controller: controller));
 
     expect(find.text('1. 치킨\n2. 피자'), findsNothing);
-    expect(find.text('AI 주방장, 오늘의 메뉴 조합 중!'), findsOneWidget);
+    expect(find.text('AI가 메뉴를 생성중입니다'), findsOneWidget);
     expect(find.text('2 / 14'), findsNothing);
     expect(find.byType(LinearProgressIndicator), findsNothing);
   });
